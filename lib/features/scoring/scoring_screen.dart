@@ -85,13 +85,20 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
       _successController.forward();
       HapticFeedback.heavyImpact();
 
-      // Auto navigate back after 1.8 seconds
+      // Auto navigate back or to next student after 1.8 seconds
       await Future.delayed(const Duration(milliseconds: 1800));
       if (mounted) {
         _successController.reset();
         setState(() => _showSuccess = false);
         ref.read(scoringProvider.notifier).reset();
-        context.pop();
+        
+        final pending = ref.read(studentProvider).pending;
+        if (pending.isNotEmpty) {
+          final nextStudent = pending.first;
+          context.replace('/scoring/${nextStudent.id}?classId=${widget.classId}');
+        } else {
+          context.pop();
+        }
       }
     } else {
       // Tampilkan error jika ada

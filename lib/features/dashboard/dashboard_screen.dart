@@ -38,6 +38,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final themeMode = ref.watch(themeModeProvider);
 
+    // Find assignment to resume
+    final resumeAssignment = assignments.cast<AssignmentModel?>().firstWhere(
+      (a) => a != null && a.scoredStudents > 0 && a.scoredStudents < a.totalStudents,
+      orElse: () => null,
+    );
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -123,7 +129,70 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
+                  
+                  // ── Resume Banner ──────────────────────────────────────
+                  if (resumeAssignment != null) ...[
+                    Animate(
+                      effects: [
+                        FadeEffect(duration: 400.ms, delay: 100.ms),
+                        SlideEffect(begin: const Offset(0, 0.2), duration: 400.ms),
+                      ],
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppTheme.primary.withValues(alpha: 0.1), AppTheme.primary.withValues(alpha: 0.05)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.play_arrow_rounded, color: AppTheme.primary),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Lanjutkan Penilaian', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Kelas ${resumeAssignment.className} - ${resumeAssignment.periodName}',
+                                    style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                context.push('/students/${resumeAssignment.classId}?assignmentId=${resumeAssignment.id}');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.primary,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              child: const Text('Lanjut'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
 
                   // ── Section Title ──────────────────────────────────────
                   Animate(
