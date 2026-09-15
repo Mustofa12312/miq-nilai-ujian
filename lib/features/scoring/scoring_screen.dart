@@ -259,8 +259,11 @@ class _SectionHeader extends StatelessWidget {
     Color color;
     if (pct >= 0.9) {
       color = AppTheme.success;
-    } else if (pct >= 0.7) color = AppTheme.warning;
-    else color = AppTheme.error;
+    } else if (pct >= 0.7) {
+      color = AppTheme.warning;
+    } else {
+      color = AppTheme.error;
+    }
 
     return Animate(
       effects: [
@@ -344,10 +347,15 @@ class _TotalBar extends StatelessWidget {
     Color gradeColor;
     if (pct >= 90) {
       gradeColor = AppTheme.success;
-    } else if (pct >= 80) gradeColor = const Color(0xFF0EA5E9);
-    else if (pct >= 70) gradeColor = AppTheme.secondary;
-    else if (pct >= 60) gradeColor = AppTheme.warning;
-    else gradeColor = AppTheme.error;
+    } else if (pct >= 80) {
+      gradeColor = const Color(0xFF0EA5E9);
+    } else if (pct >= 70) {
+      gradeColor = AppTheme.secondary;
+    } else if (pct >= 60) {
+      gradeColor = AppTheme.warning;
+    } else {
+      gradeColor = AppTheme.error;
+    }
 
     return Animate(
       effects: [
