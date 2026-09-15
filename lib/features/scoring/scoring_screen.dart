@@ -257,8 +257,9 @@ class _SectionHeader extends StatelessWidget {
     final pct = max > 0 ? total / max : 0.0;
 
     Color color;
-    if (pct >= 0.9) color = AppTheme.success;
-    else if (pct >= 0.7) color = AppTheme.warning;
+    if (pct >= 0.9) {
+      color = AppTheme.success;
+    } else if (pct >= 0.7) color = AppTheme.warning;
     else color = AppTheme.error;
 
     return Animate(
@@ -273,17 +274,17 @@ class _SectionHeader extends StatelessWidget {
             end: Alignment.centerRight,
             colors: isDark
                 ? [
-                    AppTheme.primary.withOpacity(0.15),
-                    AppTheme.primary.withOpacity(0.05),
+                    AppTheme.primary.withValues(alpha: 0.15),
+                    AppTheme.primary.withValues(alpha: 0.05),
                   ]
                 : [
                     AppTheme.primarySurface,
-                    AppTheme.primarySurface.withOpacity(0.3),
+                    AppTheme.primarySurface.withValues(alpha: 0.3),
                   ],
           ),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: AppTheme.primary.withOpacity(0.2),
+            color: AppTheme.primary.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -341,8 +342,9 @@ class _TotalBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final pct = scoringState.percentage;
     Color gradeColor;
-    if (pct >= 90) gradeColor = AppTheme.success;
-    else if (pct >= 80) gradeColor = const Color(0xFF0EA5E9);
+    if (pct >= 90) {
+      gradeColor = AppTheme.success;
+    } else if (pct >= 80) gradeColor = const Color(0xFF0EA5E9);
     else if (pct >= 70) gradeColor = AppTheme.secondary;
     else if (pct >= 60) gradeColor = AppTheme.warning;
     else gradeColor = AppTheme.error;
@@ -371,7 +373,7 @@ class _TotalBar extends StatelessWidget {
               const BorderRadius.vertical(top: Radius.circular(28)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
               blurRadius: 20,
               offset: const Offset(0, -4),
             ),
@@ -386,8 +388,8 @@ class _TotalBar extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 color: isDark
-                    ? AppTheme.onSurfaceVariantDark.withOpacity(0.3)
-                    : AppTheme.onSurfaceVariantLight.withOpacity(0.3),
+                    ? AppTheme.onSurfaceVariantDark.withValues(alpha: 0.3)
+                    : AppTheme.onSurfaceVariantLight.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -548,7 +550,7 @@ class _SuccessOverlay extends StatelessWidget {
                 borderRadius: BorderRadius.circular(28),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primary.withOpacity(0.3),
+                    color: AppTheme.primary.withValues(alpha: 0.3),
                     blurRadius: 40,
                     offset: const Offset(0, 12),
                   ),
@@ -561,7 +563,7 @@ class _SuccessOverlay extends StatelessWidget {
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withOpacity(0.12),
+                      color: AppTheme.primary.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(

@@ -144,7 +144,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: AppTheme.primary.withOpacity(0.12),
+                            color: AppTheme.primary.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -217,7 +217,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: Text(
               'Assalamu\'alaikum,',
               style: TextStyle(
-                color: Colors.white.withOpacity(0.75),
+                color: Colors.white.withValues(alpha: 0.75),
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -259,7 +259,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: AppTheme.primary.withOpacity(0.1),
+                color: AppTheme.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -360,7 +360,7 @@ class _AssignmentCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
             color: isComplete
-                ? AppTheme.primary.withOpacity(0.3)
+                ? AppTheme.primary.withValues(alpha: 0.3)
                 : (isDark
                     ? const Color(0xFF1E2939)
                     : const Color(0xFFE2E8F0)),
@@ -369,8 +369,8 @@ class _AssignmentCard extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isComplete
-                  ? AppTheme.primary.withOpacity(0.08)
-                  : Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                  ? AppTheme.primary.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -382,8 +382,8 @@ class _AssignmentCard extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(22),
-            splashColor: AppTheme.primary.withOpacity(0.06),
-            highlightColor: AppTheme.primary.withOpacity(0.03),
+            splashColor: AppTheme.primary.withValues(alpha: 0.06),
+            highlightColor: AppTheme.primary.withValues(alpha: 0.03),
             child: Padding(
               padding: const EdgeInsets.all(18),
               child: Column(
@@ -461,10 +461,10 @@ class _AssignmentCard extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
-                            color: AppTheme.success.withOpacity(0.12),
+                            color: AppTheme.success.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
-                              color: AppTheme.success.withOpacity(0.3),
+                              color: AppTheme.success.withValues(alpha: 0.3),
                             ),
                           ),
                           child: Row(

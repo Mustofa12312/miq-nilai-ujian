@@ -98,7 +98,7 @@ class _CriteriaRowState extends State<CriteriaRow>
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: entry.mistakes > 0
-                ? AppTheme.warning.withOpacity(0.3)
+                ? AppTheme.warning.withValues(alpha: 0.3)
                 : Colors.transparent,
             width: 1,
           ),
@@ -280,10 +280,10 @@ class _CounterButtonState extends State<_CounterButton>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: widget.enabled
-                ? AppTheme.primary.withOpacity(widget.isDark ? 0.2 : 0.1)
+                ? AppTheme.primary.withValues(alpha: widget.isDark ? 0.2 : 0.1)
                 : Colors.transparent,
             border: Border.all(
-              color: color.withOpacity(widget.enabled ? 0.4 : 0.2),
+              color: color.withValues(alpha: widget.enabled ? 0.4 : 0.2),
               width: 1.5,
             ),
           ),

@@ -28,7 +28,7 @@ class GradeBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = _color.withOpacity(0.12);
+    final bgColor = _color.withValues(alpha: 0.12);
     final fontSize = large ? 18.0 : 12.0;
     final padding = large
         ? const EdgeInsets.symmetric(horizontal: 20, vertical: 10)
@@ -37,9 +37,9 @@ class GradeBadge extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: isDark ? _color.withOpacity(0.2) : bgColor,
+        color: isDark ? _color.withValues(alpha: 0.2) : bgColor,
         borderRadius: BorderRadius.circular(large ? 14 : 8),
-        border: Border.all(color: _color.withOpacity(0.3), width: 1),
+        border: Border.all(color: _color.withValues(alpha: 0.3), width: 1),
       ),
       child: Text(
         grade,
