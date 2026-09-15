@@ -8,6 +8,7 @@ import '../../shared/providers/assignment_provider.dart';
 import '../../shared/providers/student_provider.dart';
 import '../../shared/widgets/progress_header.dart';
 import '../../shared/widgets/student_list_tile.dart';
+import 'widgets/qr_scanner_dialog.dart';
 
 class StudentsScreen extends ConsumerStatefulWidget {
   final int classId;
@@ -166,6 +167,34 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
                 ),
               ],
             ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          HapticFeedback.lightImpact();
+          final scannedId = await showDialog<int>(
+            context: context,
+            builder: (ctx) => const QRScannerDialog(),
+          );
+          
+          if (scannedId != null && context.mounted) {
+            // Cek apakah santri ini ada di kelas ini
+            final student = filtered.where((s) => s.id == scannedId).firstOrNull;
+            if (student != null) {
+              context.push('/scoring/${student.id}?classId=${widget.classId}');
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Santri tidak ditemukan di kelas ini.'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        },
+        backgroundColor: AppTheme.primary,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.qr_code_scanner_rounded),
+        label: const Text('Scan QR', style: TextStyle(fontWeight: FontWeight.bold)),
+      ),
     );
   }
 

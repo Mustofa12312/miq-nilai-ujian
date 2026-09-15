@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/models/student_model.dart';
 import '../../core/services/supabase_service.dart';
+import '../../core/services/local_storage_service.dart';
+import 'local_storage_provider.dart';
 
 /// State untuk daftar santri per kelas
 class StudentState {
@@ -50,7 +52,8 @@ class StudentState {
 }
 
 class StudentNotifier extends StateNotifier<StudentState> {
-  StudentNotifier() : super(const StudentState());
+  final LocalStorageService? localStorage;
+  StudentNotifier(this.localStorage) : super(const StudentState());
 
   /// Muat santri dari Supabase, difilter per periode aktif
   Future<void> loadStudents(int classId, {int? periodId, int? examTypeId}) async {
@@ -114,7 +117,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
       }
 
       // 4. Bangun list StudentModel dengan status isScored yang akurat
-      final students = studentsRes.map((json) {
+      final newList = studentsRes.map((json) {
         return StudentModel.fromJson(
           json,
           scoredIds: scoredIds,
@@ -122,8 +125,43 @@ class StudentNotifier extends StateNotifier<StudentState> {
         );
       }).toList();
 
-      state = state.copyWith(students: students, isLoading: false);
+      state = state.copyWith(
+        students: newList,
+        isLoading: false,
+      );
+
+      // Cache ke lokal
+      if (localStorage != null) {
+        final dataToCache = newList.map((s) => {
+          'id': s.id,
+          'class_id': s.classId,
+          'full_name': s.fullName,
+          'active': s.active,
+          'is_scored': s.isScored,
+          'total_score': s.totalScore,
+          'grade': s.grade,
+        }).toList();
+        localStorage!.saveStudents(classId, dataToCache);
+      }
     } catch (e) {
+      if (localStorage != null) {
+        final cached = localStorage!.getStudents(classId);
+        if (cached != null) {
+          state = state.copyWith(
+            students: cached.map((json) => StudentModel(
+              id: (json['id'] as num).toInt(),
+              classId: (json['class_id'] as num).toInt(),
+              fullName: json['full_name'] as String,
+              active: json['active'] as bool? ?? true,
+              isScored: json['is_scored'] as bool? ?? false,
+              totalScore: (json['total_score'] as num?)?.toDouble(),
+              grade: json['grade'] as String?,
+            )).toList(),
+            isLoading: false,
+          );
+          return;
+        }
+      }
       state = state.copyWith(
         isLoading: false,
         error: 'Gagal memuat data santri: ${e.toString()}',
@@ -165,7 +203,8 @@ class StudentNotifier extends StateNotifier<StudentState> {
 
 final studentProvider =
     StateNotifierProvider<StudentNotifier, StudentState>((ref) {
-  return StudentNotifier();
+  final localStorage = ref.watch(localStorageProvider);
+  return StudentNotifier(localStorage);
 });
 
 /// Provider for a single student by ID

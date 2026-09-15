@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app.dart';
+import 'core/services/local_storage_service.dart';
+import 'shared/providers/local_storage_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,9 +20,14 @@ Future<void> main() async {
     ),
   );
 
+  final localStorage = await LocalStorageService.init();
+
   runApp(
-    const ProviderScope(
-      child: MiqApp(),
+    ProviderScope(
+      overrides: [
+        localStorageProvider.overrideWithValue(localStorage),
+      ],
+      child: const MiqApp(),
     ),
   );
 }

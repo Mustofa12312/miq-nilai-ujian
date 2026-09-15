@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/models/criteria_model.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/services/supabase_service.dart';
+import '../../core/services/local_storage_service.dart';
+import 'local_storage_provider.dart';
 
 /// State satu baris kriteria (mistakes count)
 class CriteriaEntry {
@@ -82,7 +84,8 @@ class ScoringState {
 }
 
 class ScoringNotifier extends StateNotifier<ScoringState> {
-  ScoringNotifier() : super(const ScoringState());
+  final LocalStorageService? localStorage;
+  ScoringNotifier(this.localStorage) : super(const ScoringState());
 
   /// Inisialisasi form — muat kriteria dari Supabase, resolve periode & exam_type
   Future<void> initForStudent({int? periodId, int? examTypeId}) async {
@@ -238,7 +241,32 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
 
       state = state.copyWith(isSaving: false, isSaved: true);
       return true;
-    } on Exception catch (e) {
+    } catch (e) {
+      final isOffline = e.toString().contains('Failed host lookup') || 
+                        e.toString().contains('ClientException') ||
+                        e.toString().contains('Connection refused');
+
+      if (isOffline && localStorage != null) {
+        // Save to offline queue
+        await localStorage!.savePendingScore({
+          'student_id': studentId,
+          'class_id': classId,
+          'period_id': state.periodId,
+          'exam_type_id': state.examTypeId,
+          'total_score': state.totalScore,
+          'grade': state.grade,
+          'entries': state.entries.map((e) => {
+            'criteria_id': e.criteria.id,
+            'mistakes': e.mistakes,
+            'score': e.score,
+          }).toList(),
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+        
+        state = state.copyWith(isSaving: false, isSaved: true);
+        return true;
+      }
+
       state = state.copyWith(
         isSaving: false,
         error: e.toString().replaceAll('Exception: ', ''),
@@ -254,5 +282,6 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
 
 final scoringProvider =
     StateNotifierProvider<ScoringNotifier, ScoringState>((ref) {
-  return ScoringNotifier();
+  final localStorage = ref.watch(localStorageProvider);
+  return ScoringNotifier(localStorage);
 });

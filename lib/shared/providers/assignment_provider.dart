@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/models/assignment_model.dart';
 import '../../core/services/supabase_service.dart';
+import '../../core/services/local_storage_service.dart';
+import 'local_storage_provider.dart';
 
 class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
-  AssignmentNotifier() : super([]);
+  final LocalStorageService? localStorage;
+  AssignmentNotifier(this.localStorage) : super([]);
 
   Future<void> loadAssignments(String examinerId) async {
     try {
@@ -90,7 +93,7 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
       }
 
       // 4. Bangun list AssignmentModel
-      state = assignmentsRes.map((json) {
+      final newList = assignmentsRes.map((json) {
         final cid = (json['class_id'] as num).toInt();
         return AssignmentModel.fromJson(
           json,
@@ -99,8 +102,45 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
           defaultExamTypeId: defaultExamTypeId,
         );
       }).toList();
+
+      state = newList;
+
+      // 5. Cache ke lokal
+      if (localStorage != null) {
+        final dataToCache = newList.map((a) => {
+          'id': a.id,
+          'examiner_id': a.examinerId,
+          'period_id': a.periodId,
+          'period': {'id': a.periodId, 'name': a.periodName},
+          'class_id': a.classId,
+          'class': {
+            'id': a.classId,
+            'name': a.className,
+            'level_id': a.levelId,
+            'level': {'id': a.levelId, 'name': a.levelName}
+          },
+          'totalStudents': a.totalStudents,
+          'scoredStudents': a.scoredStudents,
+          'examTypeId': a.examTypeId,
+        }).toList();
+        localStorage!.saveAssignments(dataToCache);
+      }
     } catch (e) {
-      // Jika ada error, state tetap list kosong
+      // Jika error (misal offline), coba load dari cache lokal
+      if (localStorage != null) {
+        final cached = localStorage!.getAssignments();
+        if (cached != null) {
+          state = cached.map((json) {
+            return AssignmentModel.fromJson(
+              json,
+              totalStudents: (json['totalStudents'] as num?)?.toInt() ?? 0,
+              scoredStudents: (json['scoredStudents'] as num?)?.toInt() ?? 0,
+              defaultExamTypeId: (json['examTypeId'] as num?)?.toInt() ?? 1,
+            );
+          }).toList();
+          return;
+        }
+      }
       state = [];
     }
   }
@@ -126,7 +166,8 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
 
 final assignmentProvider =
     StateNotifierProvider<AssignmentNotifier, List<AssignmentModel>>((ref) {
-  return AssignmentNotifier();
+  final localStorage = ref.watch(localStorageProvider);
+  return AssignmentNotifier(localStorage);
 });
 
 /// Convenience: total stats across all assignments

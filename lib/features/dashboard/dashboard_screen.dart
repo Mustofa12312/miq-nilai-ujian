@@ -8,6 +8,7 @@ import '../../shared/models/assignment_model.dart';
 import '../../shared/providers/auth_provider.dart';
 import '../../shared/providers/assignment_provider.dart';
 import '../../shared/widgets/stat_card.dart';
+import '../../shared/providers/sync_provider.dart';
 import '../../app.dart';
 
 
@@ -37,6 +38,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final totalStats = ref.watch(totalStatsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final themeMode = ref.watch(themeModeProvider);
+    
+    // Trigger auto-sync
+    ref.watch(autoSyncProvider);
+    final isSyncing = ref.watch(syncStateProvider);
 
     // Find assignment to resume
     final resumeAssignment = assignments.cast<AssignmentModel?>().firstWhere(
@@ -76,6 +81,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             : ThemeMode.dark;
                   },
                 ),
+                if (isSyncing)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 8.0),
+                    child: Center(
+                      child: SizedBox(
+                        width: 16, height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
+                      ),
+                    ),
+                  ),
                 IconButton(
                   icon: const Icon(Icons.logout_rounded),
                   tooltip: 'Keluar',
