@@ -1,0 +1,49 @@
+name: miq_flutter
+description: "MIQ Smart Assessment System - Aplikasi Penilaian Al-Qur'an"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Supabase
+  supabase_flutter: ^2.8.4
+
+  # Navigation
+  go_router: ^14.8.1
+
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+
+  # UI & Fonts
+  google_fonts: ^6.2.1
+  flutter_animate: ^4.5.2
+  shimmer: ^3.0.0
+  lottie: ^3.3.1
+  gap: ^3.0.1
+  fl_chart: ^0.70.2
+
+  # Utils
+  shared_preferences: ^2.3.5
+  intl: ^0.20.2
+  flutter_svg: ^2.0.17
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.14
+  riverpod_generator: ^2.6.1
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/animations/
+    - assets/icons/
