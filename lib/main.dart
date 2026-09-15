@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'app.dart';
-
-// Supabase credentials — ganti dengan URL & ANON KEY dari Supabase project Anda
-const String supabaseUrl = 'https://your-project.supabase.co';
-const String supabaseAnonKey = 'your-anon-key-here';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await dotenv.load(fileName: ".env");
+
   await Supabase.initialize(
-    url: supabaseUrl,
+    url: dotenv.env['SUPABASE_URL'] ?? '',
     // ignore: deprecated_member_use
-    anonKey: supabaseAnonKey,
-    authOptions: FlutterAuthClientOptions(
+    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    authOptions: const FlutterAuthClientOptions(
       authFlowType: AuthFlowType.pkce,
     ),
   );
