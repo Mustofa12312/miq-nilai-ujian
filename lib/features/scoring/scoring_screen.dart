@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/constants/app_constants.dart';
+
 import '../../shared/models/student_model.dart';
 import '../../shared/providers/assignment_provider.dart';
 import '../../shared/providers/scoring_provider.dart';
@@ -48,8 +48,8 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
       CurvedAnimation(parent: _successController, curve: Curves.easeOut),
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(scoringProvider.notifier).initForStudent();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(scoringProvider.notifier).initForStudent();
     });
   }
 
@@ -65,7 +65,7 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
     final scoring = ref.read(scoringProvider);
     final success = await ref
         .read(scoringProvider.notifier)
-        .saveScore(widget.studentId);
+        .saveScore(widget.studentId, widget.classId);
 
     if (success) {
       // Update student state
@@ -92,6 +92,18 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
         setState(() => _showSuccess = false);
         ref.read(scoringProvider.notifier).reset();
         context.pop();
+      }
+    } else {
+      // Tampilkan error jika ada
+      final error = ref.read(scoringProvider).error;
+      if (error != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }
@@ -137,9 +149,16 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
       body: Stack(
         children: [
           // ── Main Content ──────────────────────────────────────────────
-          scoringState.entries.isEmpty
+          scoringState.isLoadingCriteria
               ? const Center(child: CircularProgressIndicator())
-              : _buildContent(context, scoringState, isDark),
+              : scoringState.entries.isEmpty
+                  ? Center(
+                      child: Text(
+                        scoringState.error ?? 'Tidak ada kriteria penilaian.',
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : _buildContent(context, scoringState, isDark),
 
           // ── Floating Total Bar ────────────────────────────────────────
           if (scoringState.entries.isNotEmpty)
@@ -438,7 +457,7 @@ class _TotalBar extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'dari ${AppConstants.maxTotalScore.toInt()} poin',
+                      'dari ${scoringState.maxPossibleScore.toInt()} poin',
                       style: TextStyle(
                         fontSize: 12,
                         color: isDark

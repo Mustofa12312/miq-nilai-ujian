@@ -21,4 +21,15 @@ class CriteriaModel {
   }
 
   int get maxMistakes => (defaultScore / deduction).floor();
+
+  factory CriteriaModel.fromJson(Map<String, dynamic> json) {
+    return CriteriaModel(
+      id: (json['id'] as num).toInt(),
+      category: json['category'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      defaultScore: (json['default_score'] as num).toDouble(),
+      deduction: (json['deduction'] as num).toDouble(),
+      sortOrder: (json['sort_order'] as num? ?? 0).toInt(),
+    );
+  }
 }

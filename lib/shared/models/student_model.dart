@@ -40,4 +40,29 @@ class StudentModel {
       grade: grade ?? this.grade,
     );
   }
+
+  /// Parse dari response Supabase.
+  /// [scoredIds] adalah `Set<int>` berisi student_id yang sudah dinilai
+  /// pada periode + jenis ujian aktif saat ini.
+  factory StudentModel.fromJson(
+    Map<String, dynamic> json, {
+    Set<int> scoredIds = const {},
+    Map<int, Map<String, dynamic>> scoreMap = const {},
+  }) {
+    final id = (json['id'] as num).toInt();
+    final isScored = scoredIds.contains(id);
+    final scoreData = scoreMap[id];
+
+    return StudentModel(
+      id: id,
+      classId: (json['class_id'] as num).toInt(),
+      fullName: json['full_name'] as String? ?? '',
+      active: json['active'] as bool? ?? true,
+      isScored: isScored,
+      totalScore: isScored && scoreData != null
+          ? (scoreData['total_score'] as num?)?.toDouble()
+          : null,
+      grade: isScored && scoreData != null ? scoreData['grade'] as String? : null,
+    );
+  }
 }

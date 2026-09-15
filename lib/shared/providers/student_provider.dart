@@ -1,17 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/models/student_model.dart';
-import '../../core/constants/app_constants.dart';
+import '../../core/services/supabase_service.dart';
 
 /// State untuk daftar santri per kelas
 class StudentState {
   final List<StudentModel> students;
   final String searchQuery;
   final bool isLoading;
+  final String? error;
 
   const StudentState({
     this.students = const [],
     this.searchQuery = '',
     this.isLoading = false,
+    this.error,
   });
 
   List<StudentModel> get filtered {
@@ -35,11 +37,14 @@ class StudentState {
     List<StudentModel>? students,
     String? searchQuery,
     bool? isLoading,
+    String? error,
+    bool clearError = false,
   }) {
     return StudentState(
       students: students ?? this.students,
       searchQuery: searchQuery ?? this.searchQuery,
       isLoading: isLoading ?? this.isLoading,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -47,11 +52,83 @@ class StudentState {
 class StudentNotifier extends StateNotifier<StudentState> {
   StudentNotifier() : super(const StudentState());
 
-  Future<void> loadStudents(int classId) async {
-    state = state.copyWith(isLoading: true);
-    await Future.delayed(const Duration(milliseconds: 600));
-    final students = AppConstants.mockStudentsForClass(classId);
-    state = state.copyWith(students: students, isLoading: false);
+  /// Muat santri dari Supabase, difilter per periode aktif
+  Future<void> loadStudents(int classId, {int? periodId, int? examTypeId}) async {
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    try {
+      // 1. Ambil daftar santri aktif di kelas ini
+      final studentsRes = await supabase
+          .from('students')
+          .select('id, class_id, full_name, active')
+          .eq('class_id', classId)
+          .eq('active', true)
+          .order('full_name', ascending: true);
+
+      if (studentsRes.isEmpty) {
+        state = state.copyWith(students: [], isLoading: false);
+        return;
+      }
+
+      // 2. Resolve periode aktif dan exam_type jika tidak dikirim dari luar
+      int? activePeriodId = periodId;
+      int? activeExamTypeId = examTypeId;
+
+      if (activePeriodId == null) {
+        final periodRes = await supabase
+            .from('exam_periods')
+            .select('id')
+            .eq('active', true)
+            .maybeSingle();
+        activePeriodId = periodRes != null ? (periodRes['id'] as num).toInt() : null;
+      }
+
+      if (activeExamTypeId == null) {
+        final examTypeRes = await supabase
+            .from('exam_types')
+            .select('id')
+            .order('id', ascending: true)
+            .limit(1)
+            .maybeSingle();
+        activeExamTypeId = examTypeRes != null ? (examTypeRes['id'] as num).toInt() : null;
+      }
+
+      // 3. Ambil nilai yang sudah ada untuk periode + jenis ujian aktif ini
+      final studentIds = studentsRes.map((s) => s['id']).toList();
+      Set<int> scoredIds = {};
+      Map<int, Map<String, dynamic>> scoreMap = {};
+
+      if (activePeriodId != null && activeExamTypeId != null) {
+        final scoresRes = await supabase
+            .from('scores')
+            .select('student_id, total_score, grade')
+            .inFilter('student_id', studentIds)
+            .eq('period_id', activePeriodId)
+            .eq('exam_type_id', activeExamTypeId);
+
+        for (final sc in scoresRes) {
+          final sid = (sc['student_id'] as num).toInt();
+          scoredIds.add(sid);
+          scoreMap[sid] = sc;
+        }
+      }
+
+      // 4. Bangun list StudentModel dengan status isScored yang akurat
+      final students = studentsRes.map((json) {
+        return StudentModel.fromJson(
+          json,
+          scoredIds: scoredIds,
+          scoreMap: scoreMap,
+        );
+      }).toList();
+
+      state = state.copyWith(students: students, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: 'Gagal memuat data santri: ${e.toString()}',
+      );
+    }
   }
 
   void updateSearch(String query) {
@@ -62,7 +139,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
     state = state.copyWith(searchQuery: '');
   }
 
-  /// Mark student as scored after saving
+  /// Mark student as scored secara lokal setelah nilai berhasil disimpan
   void markAsScored(int studentId, double totalScore, String grade) {
     state = state.copyWith(
       students: state.students.map((s) {
@@ -81,7 +158,6 @@ class StudentNotifier extends StateNotifier<StudentState> {
   /// Get next unscored student after current
   StudentModel? getNextPending(int currentStudentId) {
     final pending = state.pending;
-    // Remove current if it was just scored
     final others = pending.where((s) => s.id != currentStudentId).toList();
     return others.isNotEmpty ? others.first : null;
   }

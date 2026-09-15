@@ -307,10 +307,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: const Text('Batal'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              ref.read(authProvider.notifier).logout();
-              context.go('/login');
+              await ref.read(authProvider.notifier).logout();
+              if (context.mounted) context.go('/login');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.error,

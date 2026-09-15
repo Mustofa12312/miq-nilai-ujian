@@ -22,6 +22,16 @@ class UserModel {
     }
     return fullName.substring(0, 2).toUpperCase();
   }
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'] as String,
+      fullName: json['full_name'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      role: UserRole.fromString(json['role'] as String? ?? 'examiner'),
+      status: json['status'] as bool? ?? true,
+    );
+  }
 }
 
 enum UserRole {
@@ -40,6 +50,20 @@ enum UserRole {
         return 'Penguji';
       case UserRole.leader:
         return 'Pimpinan';
+    }
+  }
+
+  /// Kolom `role` di database: 'super_admin', 'admin', 'examiner', 'leader'
+  static UserRole fromString(String value) {
+    switch (value) {
+      case 'super_admin':
+        return UserRole.superAdmin;
+      case 'admin':
+        return UserRole.admin;
+      case 'leader':
+        return UserRole.leader;
+      default:
+        return UserRole.examiner;
     }
   }
 }

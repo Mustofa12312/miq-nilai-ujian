@@ -33,7 +33,15 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(studentProvider.notifier).loadStudents(widget.classId);
+      // Ambil context periode dan exam_type dari assignment yang sudah di-load
+      final assignment = ref
+          .read(assignmentProvider.notifier)
+          .getByClassId(widget.classId);
+      ref.read(studentProvider.notifier).loadStudents(
+            widget.classId,
+            periodId: assignment?.periodId,
+            examTypeId: assignment?.examTypeId,
+          );
     });
     _searchCtrl.addListener(() {
       ref.read(studentProvider.notifier).updateSearch(_searchCtrl.text);
