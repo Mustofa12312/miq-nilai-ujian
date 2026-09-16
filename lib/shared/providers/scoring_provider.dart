@@ -255,8 +255,7 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
         final scoreRes = await supabase
             .from('scores')
             .update({
-              'total_score': state.totalScore,
-              'grade': state.grade,
+              'period_id': state.periodId, // memicu trigger jika perlu, tapi intinya tidak mengirim total_score
             })
             .eq('id', actualScoreId)
             .select()
@@ -285,8 +284,6 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
             .insert({
               'session_id': sessionRes['id'],
               'student_id': studentId,
-              'total_score': state.totalScore,
-              'grade': state.grade,
               'period_id': state.periodId,
               'exam_type_id': state.examTypeId,
             })
