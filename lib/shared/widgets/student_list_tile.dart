@@ -96,20 +96,22 @@ class StudentListTile extends StatelessWidget {
                               height: 8,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isScored
-                                    ? AppTheme.success
-                                    : AppTheme.warning,
+                                color: student.isLocked
+                                    ? AppTheme.error
+                                    : (isScored ? AppTheme.success : AppTheme.warning),
                               ),
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              isScored ? 'Sudah Dinilai' : 'Belum Dinilai',
+                              student.isLocked
+                                  ? 'Terkunci'
+                                  : (isScored ? 'Sudah Dinilai' : 'Belum Dinilai'),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
-                                color: isScored
-                                    ? AppTheme.success
-                                    : AppTheme.warning,
+                                color: student.isLocked
+                                    ? AppTheme.error
+                                    : (isScored ? AppTheme.success : AppTheme.warning),
                               ),
                             ),
                           ],
@@ -118,9 +120,13 @@ class StudentListTile extends StatelessWidget {
                     ),
                   ),
                   // Score badge or chevron
-                  if (isScored && student.grade != null)
-                    GradeBadge(grade: student.grade!)
-                  else
+                  if (isScored && student.grade != null) ...[
+                    GradeBadge(grade: student.grade!),
+                    if (student.isLocked) ...[
+                      const SizedBox(width: 8),
+                      const Icon(Icons.lock_rounded, color: AppTheme.error, size: 20),
+                    ]
+                  ] else
                     Icon(
                       Icons.chevron_right_rounded,
                       color: isDark

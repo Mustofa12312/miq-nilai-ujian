@@ -92,9 +92,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   ),
                 IconButton(
-                  icon: const Icon(Icons.logout_rounded),
-                  tooltip: 'Keluar',
-                  onPressed: () => _confirmLogout(context),
+                  icon: const Icon(Icons.cloud_sync_rounded),
+                  tooltip: 'Antrian Sinkronisasi',
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    context.push('/sync-queue');
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.person_rounded),
+                  tooltip: 'Profil',
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    context.push('/profile');
+                  },
                 ),
                 const SizedBox(width: 4),
               ],
@@ -372,36 +383,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _confirmLogout(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text('Keluar'),
-        content: const Text('Apakah Anda yakin ingin keluar?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) context.go('/login');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.error,
-            ),
-            child: const Text('Keluar'),
-          ),
-        ],
       ),
     );
   }

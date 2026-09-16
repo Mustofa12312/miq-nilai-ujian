@@ -49,7 +49,14 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(scoringProvider.notifier).initForStudent();
+      final studentList = ref.read(studentProvider).students;
+      final student = studentList.where((s) => s.id == widget.studentId).firstOrNull;
+
+      await ref.read(scoringProvider.notifier).initForStudent(
+        studentId: widget.studentId,
+        scoreId: student?.scoreId,
+        isLocked: student?.isLocked ?? false,
+      );
     });
   }
 
@@ -177,7 +184,7 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
                 scoringState: scoringState,
                 isDark: isDark,
                 isSaving: scoringState.isSaving,
-                onSave: _handleSave,
+                onSave: scoringState.isLocked ? null : _handleSave,
               ),
             ),
 
@@ -220,6 +227,7 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
             return CriteriaRow(
               entry: entry.value,
               index: entry.key,
+              enabled: !scoringState.isLocked,
               onIncrement: () => ref
                   .read(scoringProvider.notifier)
                   .incrementMistakes(entry.value.criteria.id),
@@ -246,6 +254,7 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
             return CriteriaRow(
               entry: entry.value,
               index: entry.key + 4,
+              enabled: !scoringState.isLocked,
               onIncrement: () => ref
                   .read(scoringProvider.notifier)
                   .incrementMistakes(entry.value.criteria.id),
@@ -358,7 +367,7 @@ class _TotalBar extends StatelessWidget {
   final ScoringState scoringState;
   final bool isDark;
   final bool isSaving;
-  final VoidCallback onSave;
+  final VoidCallback? onSave;
 
   const _TotalBar({
     required this.scoringState,
@@ -486,55 +495,81 @@ class _TotalBar extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Save Button
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: isSaving ? null : onSave,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
+            if (onSave != null)
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: isSaving ? null : onSave,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(18),
+                    ),
                   ),
+                  child: isSaving
+                      ? const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            ),
+                            SizedBox(width: 12),
+                            Text(
+                              'Menyimpan...',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        )
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.save_rounded, size: 20),
+                            SizedBox(width: 10),
+                            Text(
+                              'Simpan Nilai',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
-                child: isSaving
-                    ? const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.5,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Text(
-                            'Menyimpan...',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      )
-                    : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.save_rounded, size: 20),
-                          SizedBox(width: 10),
-                          Text(
-                            'Simpan Nilai',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
+              )
+            else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppTheme.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppTheme.error.withValues(alpha: 0.3)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.lock_outline_rounded, color: AppTheme.error, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'Nilai Terkunci oleh Admin',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.error,
                       ),
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),

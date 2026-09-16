@@ -6,6 +6,8 @@ class StudentModel {
   final bool isScored;
   final double? totalScore;
   final String? grade;
+  final int? scoreId;
+  final bool isLocked;
 
   const StudentModel({
     required this.id,
@@ -15,6 +17,8 @@ class StudentModel {
     required this.isScored,
     this.totalScore,
     this.grade,
+    this.scoreId,
+    this.isLocked = false,
   });
 
   String get initials {
@@ -29,6 +33,8 @@ class StudentModel {
     bool? isScored,
     double? totalScore,
     String? grade,
+    int? scoreId,
+    bool? isLocked,
   }) {
     return StudentModel(
       id: id,
@@ -38,6 +44,8 @@ class StudentModel {
       isScored: isScored ?? this.isScored,
       totalScore: totalScore ?? this.totalScore,
       grade: grade ?? this.grade,
+      scoreId: scoreId ?? this.scoreId,
+      isLocked: isLocked ?? this.isLocked,
     );
   }
 
@@ -63,6 +71,8 @@ class StudentModel {
           ? (scoreData['total_score'] as num?)?.toDouble()
           : null,
       grade: isScored && scoreData != null ? scoreData['grade'] as String? : null,
+      scoreId: isScored && scoreData != null ? (scoreData['id'] as num?)?.toInt() : null,
+      isLocked: isScored && scoreData != null ? (scoreData['locked'] as bool? ?? false) : false,
     );
   }
 }

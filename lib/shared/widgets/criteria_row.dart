@@ -9,6 +9,7 @@ class CriteriaRow extends StatefulWidget {
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final int index;
+  final bool enabled;
 
   const CriteriaRow({
     super.key,
@@ -16,6 +17,7 @@ class CriteriaRow extends StatefulWidget {
     required this.onIncrement,
     required this.onDecrement,
     this.index = 0,
+    this.enabled = true,
   });
 
   @override
@@ -140,13 +142,13 @@ class _CriteriaRowState extends State<CriteriaRow>
               children: [
                 _CounterButton(
                   icon: Icons.remove_rounded,
-                  onTap: isZeroMistakes
-                      ? null
-                      : () {
+                  onTap: (widget.enabled && !isZeroMistakes)
+                      ? () {
                           HapticFeedback.lightImpact();
                           widget.onDecrement();
-                        },
-                  enabled: !isZeroMistakes,
+                        }
+                      : null,
+                  enabled: widget.enabled && !isZeroMistakes,
                   isDark: isDark,
                 ),
                 Container(
@@ -167,13 +169,13 @@ class _CriteriaRowState extends State<CriteriaRow>
                 ),
                 _CounterButton(
                   icon: Icons.add_rounded,
-                  onTap: isMaxMistakes
-                      ? null
-                      : () {
+                  onTap: (widget.enabled && !isMaxMistakes)
+                      ? () {
                           HapticFeedback.lightImpact();
                           widget.onIncrement();
-                        },
-                  enabled: !isMaxMistakes,
+                        }
+                      : null,
+                  enabled: widget.enabled && !isMaxMistakes,
                   isDark: isDark,
                 ),
               ],

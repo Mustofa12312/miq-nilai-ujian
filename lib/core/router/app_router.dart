@@ -6,6 +6,8 @@ import '../../features/auth/login_screen.dart';
 import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/students/students_screen.dart';
 import '../../features/scoring/scoring_screen.dart';
+import '../../features/sync/sync_queue_screen.dart';
+import '../../features/profile/profile_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -37,6 +39,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           key: state.pageKey,
           child: const DashboardScreen(),
           transitionsBuilder: _slideUpTransition,
+        ),
+      ),
+      GoRoute(
+        path: '/sync-queue',
+        name: 'sync-queue',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const SyncQueueScreen(),
+          transitionsBuilder: _slideLeftTransition,
+        ),
+      ),
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const ProfileScreen(),
+          transitionsBuilder: _slideLeftTransition,
         ),
       ),
       GoRoute(

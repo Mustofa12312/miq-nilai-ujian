@@ -104,7 +104,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
       if (activePeriodId != null && activeExamTypeId != null) {
         final scoresRes = await supabase
             .from('scores')
-            .select('student_id, total_score, grade')
+            .select('id, student_id, total_score, grade, locked')
             .inFilter('student_id', studentIds)
             .eq('period_id', activePeriodId)
             .eq('exam_type_id', activeExamTypeId);
@@ -140,6 +140,8 @@ class StudentNotifier extends StateNotifier<StudentState> {
           'is_scored': s.isScored,
           'total_score': s.totalScore,
           'grade': s.grade,
+          'score_id': s.scoreId,
+          'is_locked': s.isLocked,
         }).toList();
         localStorage!.saveStudents(classId, dataToCache);
       }
@@ -156,6 +158,8 @@ class StudentNotifier extends StateNotifier<StudentState> {
               isScored: json['is_scored'] as bool? ?? false,
               totalScore: (json['total_score'] as num?)?.toDouble(),
               grade: json['grade'] as String?,
+              scoreId: (json['score_id'] as num?)?.toInt(),
+              isLocked: json['is_locked'] as bool? ?? false,
             )).toList(),
             isLoading: false,
           );
@@ -178,7 +182,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
   }
 
   /// Mark student as scored secara lokal setelah nilai berhasil disimpan
-  void markAsScored(int studentId, double totalScore, String grade) {
+  void markAsScored(int studentId, double totalScore, String grade, {int? scoreId}) {
     state = state.copyWith(
       students: state.students.map((s) {
         if (s.id == studentId) {
@@ -186,6 +190,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
             isScored: true,
             totalScore: totalScore,
             grade: grade,
+            scoreId: scoreId ?? s.scoreId,
           );
         }
         return s;
