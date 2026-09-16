@@ -90,8 +90,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
         final examTypeRes = await supabase
             .from('exam_types')
             .select('id')
-            .order('id', ascending: true)
-            .limit(1)
+            .eq('active', true)
             .maybeSingle();
         activeExamTypeId = examTypeRes != null ? (examTypeRes['id'] as num).toInt() : null;
       }
