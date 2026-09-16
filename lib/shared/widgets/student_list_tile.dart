@@ -87,8 +87,23 @@ class StudentListTile extends StatelessWidget {
                                 ? AppTheme.onSurfaceDark
                                 : AppTheme.onSurfaceLight,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        if (student.nis != null || student.gender != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            [
+                              if (student.nis != null && student.nis!.isNotEmpty) 'NIS: ${student.nis}',
+                              if (student.gender != null && student.gender!.isNotEmpty) student.gender,
+                            ].join(' • '),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isDark ? AppTheme.onSurfaceVariantDark : AppTheme.onSurfaceVariantLight,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 6),
                         Row(
                           children: [
                             Container(

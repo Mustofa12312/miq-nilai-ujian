@@ -24,17 +24,24 @@ class _QRScannerDialogState extends State<QRScannerDialog> {
     
     final List<Barcode> barcodes = capture.barcodes;
     if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {
-      final String code = barcodes.first.rawValue!;
-      final int? studentId = int.tryParse(code);
+      final String code = barcodes.first.rawValue!.trim();
       
-      if (studentId != null) {
+      if (code.isNotEmpty) {
         setState(() { _isProcessing = true; });
         controller.stop();
-        Navigator.of(context).pop(studentId);
+        Navigator.of(context).pop(code);
       } else {
+        setState(() { _isProcessing = true; });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('QR Code tidak valid!')),
+          const SnackBar(
+            content: Text('QR Code tidak valid!'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
         );
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) setState(() { _isProcessing = false; });
+        });
       }
     }
   }

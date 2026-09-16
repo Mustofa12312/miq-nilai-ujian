@@ -1,7 +1,12 @@
 class StudentModel {
   final int id;
   final int classId;
+  final String? nis;
   final String fullName;
+  final String? gender;
+  final String? fatherName;
+  final String? branchCode;
+  final String? branchName;
   final bool active;
   final bool isScored;
   final double? totalScore;
@@ -12,7 +17,12 @@ class StudentModel {
   const StudentModel({
     required this.id,
     required this.classId,
+    this.nis,
     required this.fullName,
+    this.gender,
+    this.fatherName,
+    this.branchCode,
+    this.branchName,
     required this.active,
     required this.isScored,
     this.totalScore,
@@ -39,7 +49,12 @@ class StudentModel {
     return StudentModel(
       id: id,
       classId: classId,
+      nis: nis,
       fullName: fullName,
+      gender: gender,
+      fatherName: fatherName,
+      branchCode: branchCode,
+      branchName: branchName,
       active: active,
       isScored: isScored ?? this.isScored,
       totalScore: totalScore ?? this.totalScore,
@@ -64,7 +79,12 @@ class StudentModel {
     return StudentModel(
       id: id,
       classId: (json['class_id'] as num).toInt(),
+      nis: json['nis'] as String?,
       fullName: json['full_name'] as String? ?? '',
+      gender: json['gender'] as String?,
+      fatherName: json['father_name'] as String?,
+      branchCode: json['branch_code'] as String?,
+      branchName: json['branch_name'] as String?,
       active: json['active'] as bool? ?? true,
       isScored: isScored,
       totalScore: isScored && scoreData != null

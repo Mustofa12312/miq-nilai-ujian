@@ -63,7 +63,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
       // 1. Ambil daftar santri aktif di kelas ini
       final studentsRes = await supabase
           .from('students')
-          .select('id, class_id, full_name, active')
+          .select('id, class_id, nis, full_name, gender, father_name, branch_code, branch_name, active')
           .eq('class_id', classId)
           .eq('active', true)
           .order('full_name', ascending: true);
@@ -135,7 +135,12 @@ class StudentNotifier extends StateNotifier<StudentState> {
         final dataToCache = newList.map((s) => {
           'id': s.id,
           'class_id': s.classId,
+          'nis': s.nis,
           'full_name': s.fullName,
+          'gender': s.gender,
+          'father_name': s.fatherName,
+          'branch_code': s.branchCode,
+          'branch_name': s.branchName,
           'active': s.active,
           'is_scored': s.isScored,
           'total_score': s.totalScore,
@@ -153,7 +158,12 @@ class StudentNotifier extends StateNotifier<StudentState> {
             students: cached.map((json) => StudentModel(
               id: (json['id'] as num).toInt(),
               classId: (json['class_id'] as num).toInt(),
+              nis: json['nis'] as String?,
               fullName: json['full_name'] as String,
+              gender: json['gender'] as String?,
+              fatherName: json['father_name'] as String?,
+              branchCode: json['branch_code'] as String?,
+              branchName: json['branch_name'] as String?,
               active: json['active'] as bool? ?? true,
               isScored: json['is_scored'] as bool? ?? false,
               totalScore: (json['total_score'] as num?)?.toDouble(),
