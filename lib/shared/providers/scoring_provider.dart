@@ -32,9 +32,6 @@ class ScoringState {
   // Context yang dibutuhkan saat simpan ke Supabase
   final int? periodId;
   final int? examTypeId;
-
-  final int? periodId;
-  final int? examTypeId;
   final int? scoreId;
   final bool isLocked;
 
@@ -151,6 +148,31 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
             }).toList();
           }
         }
+      }
+
+      // 2. Resolve periode aktif jika tidak dikirim dari luar
+      int? activePeriodId = periodId;
+      if (activePeriodId == null) {
+        final periodRes = await supabase
+            .from('exam_periods')
+            .select('id')
+            .eq('active', true)
+            .maybeSingle();
+        activePeriodId = periodRes != null ? (periodRes['id'] as num).toInt() : null;
+      }
+
+      // 3. Resolve exam_type default jika tidak dikirim dari luar
+      int? activeExamTypeId = examTypeId;
+      if (activeExamTypeId == null) {
+        final examTypeRes = await supabase
+            .from('exam_types')
+            .select('id')
+            .order('id', ascending: true)
+            .limit(1)
+            .maybeSingle();
+        activeExamTypeId = examTypeRes != null
+            ? (examTypeRes['id'] as num).toInt()
+            : null;
       }
 
       state = state.copyWith(

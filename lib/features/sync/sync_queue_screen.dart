@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../shared/providers/local_storage_provider.dart';
 import '../../shared/providers/sync_provider.dart';
+import '../../shared/providers/auth_provider.dart';
 
 class SyncQueueScreen extends ConsumerStatefulWidget {
   const SyncQueueScreen({super.key});
@@ -74,8 +75,14 @@ class _SyncQueueScreenState extends ConsumerState<SyncQueueScreen> {
                   onPressed: isSyncing
                       ? null
                       : () async {
-                          await ref.read(syncStateProvider.notifier).syncNow();
-                          setState(() {}); // Refresh local storage UI
+                          final syncService = ref.read(syncServiceProvider);
+                          final user = ref.read(currentUserProvider);
+                          if (syncService != null && user != null) {
+                            ref.read(syncStateProvider.notifier).state = true;
+                            await syncService.syncPendingScores(user.id);
+                            ref.read(syncStateProvider.notifier).state = false;
+                            setState(() {}); // Refresh local storage UI
+                          }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
