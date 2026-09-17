@@ -88,14 +88,14 @@ class StudentNotifier extends StateNotifier<StudentState> {
   StudentNotifier(this.localStorage) : super(const StudentState());
 
   /// Muat santri dari Supabase, difilter per periode aktif
-  Future<void> loadStudents(int classId, {int? periodId, int? examTypeId, int? rantingId, String? room}) async {
+  Future<void> loadStudents(int classId, {int? periodId, int? examTypeId, int? rantingId, String? room, String? gender}) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       // 1. Ambil daftar santri aktif di kelas ini
       var query = supabase
           .from('students')
-          .select('id, class_id, ranting_id, room, nis, full_name, gender, father_name, branch_code, branch_name, birth_place, birth_date, active')
+          .select('id, class_id, ranting_id, room, gender, nis, full_name, father_name, branch_code, branch_name, birth_place, birth_date, active')
           .eq('class_id', classId)
           .eq('active', true);
       
@@ -104,6 +104,10 @@ class StudentNotifier extends StateNotifier<StudentState> {
       }
       if (room != null && room.isNotEmpty) {
         query = query.eq('room', room);
+      }
+      if (gender != null && gender.isNotEmpty) {
+        // Karena kadang 'L' atau 'Laki-laki', kita pakai ilike
+        query = query.ilike('gender', '$gender%');
       }
 
       final studentsRes = await query

@@ -574,13 +574,14 @@ class _AssignmentCard extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                   ),
                             ),
-                            if (assignment.rantingName != null || assignment.room != null)
+                            if (assignment.rantingName != null || assignment.room != null || assignment.gender != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Text(
                                   [
                                     if (assignment.rantingName != null) assignment.rantingName,
-                                    if (assignment.room != null) 'Ruang: ${assignment.room}'
+                                    if (assignment.room != null) 'Ruang: ${assignment.room}',
+                                    if (assignment.gender == 'L') 'Putra' else if (assignment.gender == 'P') 'Putri'
                                   ].join(' • '),
                                   style: TextStyle(
                                     fontSize: 11,

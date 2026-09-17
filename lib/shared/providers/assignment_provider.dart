@@ -43,6 +43,7 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
             period_id,
             ranting_id,
             room,
+            gender,
             class:classes(
               id,
               name,
@@ -69,14 +70,14 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
       // Hitung total santri per kelas (nanti difilter per assignment di dart)
       final studentsRes = await supabase
           .from('students')
-          .select('id, class_id, ranting_id, room')
+          .select('id, class_id, ranting_id, room, gender')
           .inFilter('class_id', classIds)
           .eq('active', true);
 
       // Hitung yang sudah dinilai di periode + exam_type ini
       final scoredRes = await supabase
           .from('scores')
-          .select('student_id, students!inner(class_id, ranting_id, room)')
+          .select('student_id, students!inner(class_id, ranting_id, room, gender)')
           .eq('period_id', periodId)
           .eq('exam_type_id', defaultExamTypeId)
           .inFilter('students.class_id', classIds);
@@ -89,6 +90,7 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
         final cId = (a['class_id'] as num).toInt();
         final rId = a['ranting_id'] != null ? (a['ranting_id'] as num).toInt() : null;
         final room = a['room'] as String?;
+        final gender = a['gender'] as String?;
 
         // Hitung total
         int total = 0;
@@ -96,12 +98,14 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
           final sCId = (s['class_id'] as num).toInt();
           final sRId = s['ranting_id'] != null ? (s['ranting_id'] as num).toInt() : null;
           final sRoom = s['room'] as String?;
+          final sGender = s['gender'] as String?;
 
           bool matchClass = sCId == cId;
           bool matchRanting = rId == null || sRId == rId;
           bool matchRoom = room == null || room.isEmpty || sRoom == room;
+          bool matchGender = gender == null || gender.isEmpty || sGender?.toUpperCase() == gender.toUpperCase();
 
-          if (matchClass && matchRanting && matchRoom) total++;
+          if (matchClass && matchRanting && matchRoom && matchGender) total++;
         }
         totalStudentsPerAssignment[aId] = total;
 
@@ -112,12 +116,14 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
           final sCId = (studentData['class_id'] as num? ?? 0).toInt();
           final sRId = studentData['ranting_id'] != null ? (studentData['ranting_id'] as num).toInt() : null;
           final sRoom = studentData['room'] as String?;
+          final sGender = studentData['gender'] as String?;
 
           bool matchClass = sCId == cId;
           bool matchRanting = rId == null || sRId == rId;
           bool matchRoom = room == null || room.isEmpty || sRoom == room;
+          bool matchGender = gender == null || gender.isEmpty || sGender?.toUpperCase() == gender.toUpperCase();
 
-          if (matchClass && matchRanting && matchRoom) scored++;
+          if (matchClass && matchRanting && matchRoom && matchGender) scored++;
         }
         scoredPerAssignment[aId] = scored;
       }
@@ -152,13 +158,16 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
           'ranting_id': a.rantingId,
           'ranting': a.rantingId != null ? {'id': a.rantingId, 'name': a.rantingName} : null,
           'room': a.room,
+          'gender': a.gender,
           'totalStudents': a.totalStudents,
           'scoredStudents': a.scoredStudents,
           'examTypeId': a.examTypeId,
         }).toList();
         localStorage!.saveAssignments(dataToCache);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      print('ERROR IN loadAssignments: $e');
+      print(stack);
       // Jika error (misal offline), coba load dari cache lokal
       if (localStorage != null) {
         final cached = localStorage!.getAssignments();

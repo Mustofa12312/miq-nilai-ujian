@@ -46,6 +46,7 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
             examTypeId: assignment?.examTypeId,
             rantingId: assignment?.rantingId,
             room: assignment?.room,
+            gender: assignment?.gender,
           );
     });
     _searchCtrl.addListener(() {
@@ -87,7 +88,8 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
               [
                 assignment?.levelName ?? '',
                 if (assignment?.rantingName != null) assignment!.rantingName!,
-                if (assignment?.room != null) 'Ruang: ${assignment!.room!}'
+                if (assignment?.room != null) 'Ruang: ${assignment!.room!}',
+                if (assignment?.gender == 'L') 'Hanya Putra' else if (assignment?.gender == 'P') 'Hanya Putri'
               ].where((s) => s.isNotEmpty).join(' • '),
               style: TextStyle(
                 fontSize: 12,
