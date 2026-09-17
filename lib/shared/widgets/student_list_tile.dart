@@ -90,14 +90,13 @@ class StudentListTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        if (student.nis != null || student.gender != null) ...[
+                        if (student.nis != null || student.branchName != null) ...[
                           const SizedBox(height: 2),
                           Text(
                             [
-                              if (student.nis != null && student.nis!.isNotEmpty) 'NIS: ${student.nis}',
-                              if (student.gender != null && student.gender!.isNotEmpty) 
-                                student.gender?.toUpperCase() == 'L' ? 'Laki-laki (L)' : (student.gender?.toUpperCase() == 'P' ? 'Perempuan (P)' : student.gender),
-                            ].join(' • '),
+                              if (student.nis != null && student.nis!.isNotEmpty) student.nis,
+                              if (student.branchName != null && student.branchName!.isNotEmpty) student.branchName,
+                            ].join(' '),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: isDark ? AppTheme.onSurfaceVariantDark : AppTheme.onSurfaceVariantLight,
                               fontSize: 12,

@@ -95,7 +95,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
       // 1. Ambil daftar santri aktif di kelas ini
       var query = supabase
           .from('students')
-          .select('id, class_id, ranting_id, room, gender, nis, full_name, father_name, branch_code, branch_name, birth_place, birth_date, active')
+          .select('id, class_id, ranting_id, room, gender, nis, full_name, father_name, branch_code, branch_name, birth_place, birth_date, active, rantings(name)')
           .eq('class_id', classId)
           .eq('active', true);
       

@@ -100,7 +100,7 @@ class StudentModel {
       gender: json['gender'] as String?,
       fatherName: json['father_name'] as String?,
       branchCode: json['branch_code'] as String?,
-      branchName: json['branch_name'] as String?,
+      branchName: (json['branch_name'] as String?) ?? (json['rantings']?['name'] as String?),
       birthPlace: json['birth_place'] as String?,
       birthDate: json['birth_date'] as String?,
       room: json['room'] as String?,

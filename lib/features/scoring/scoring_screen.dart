@@ -89,16 +89,10 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
           .read(assignmentProvider.notifier)
           .updateScoredCount(widget.assignmentId);
 
-      // Show success animation
-      setState(() => _showSuccess = true);
-      _successController.forward();
       HapticFeedback.heavyImpact();
 
-      // Auto navigate back or to next student after 1.8 seconds
-      await Future.delayed(const Duration(milliseconds: 1800));
+      // Removed success animation, navigate immediately
       if (mounted) {
-        _successController.reset();
-        setState(() => _showSuccess = false);
         ref.read(scoringProvider.notifier).reset();
         
         final pending = ref.read(studentProvider).pending;
@@ -407,40 +401,26 @@ class _TotalBar extends StatelessWidget {
       ],
       child: Container(
         padding: EdgeInsets.fromLTRB(
-          20,
           16,
-          20,
-          MediaQuery.of(context).padding.bottom + 16,
+          12,
+          16,
+          MediaQuery.of(context).padding.bottom + 12,
         ),
         decoration: BoxDecoration(
           color: isDark ? AppTheme.surfaceDark : AppTheme.surfaceLight,
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(28)),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, -4),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
             ),
           ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Drag handle
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppTheme.onSurfaceVariantDark.withValues(alpha: 0.3)
-                    : AppTheme.onSurfaceVariantLight.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Score display
+            // Score display and Save button in one row
             Row(
               children: [
                 Column(
@@ -449,129 +429,109 @@ class _TotalBar extends StatelessWidget {
                     Text(
                       'Total Nilai',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 11,
                         fontWeight: FontWeight.w500,
                         color: isDark
                             ? AppTheme.onSurfaceVariantDark
                             : AppTheme.onSurfaceVariantLight,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
-                      transitionBuilder: (child, anim) => ScaleTransition(
-                        scale: anim,
-                        child: child,
-                      ),
-                      child: Text(
-                        scoringState.totalScore.toInt().toString(),
-                        key: ValueKey(scoringState.totalScore),
-                        style: TextStyle(
-                          fontSize: 36,
-                          fontWeight: FontWeight.w900,
-                          color: gradeColor,
-                          height: 1,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 250),
+                          transitionBuilder: (child, anim) => ScaleTransition(
+                            scale: anim,
+                            child: child,
+                          ),
+                          child: Text(
+                            scoringState.totalScore.toInt().toString(),
+                            key: ValueKey(scoringState.totalScore),
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: gradeColor,
+                              height: 1,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    Text(
-                      'dari ${scoringState.maxPossibleScore.toInt()} poin',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark
-                            ? AppTheme.onSurfaceVariantDark
-                            : AppTheme.onSurfaceVariantLight,
-                      ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '/ ${scoringState.maxPossibleScore.toInt()}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? AppTheme.onSurfaceVariantDark
+                                : AppTheme.onSurfaceVariantLight,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
+                const SizedBox(width: 12),
+                GradeBadge(grade: scoringState.grade),
                 const Spacer(),
-                GradeCircle(
-                  percentage: pct,
-                  grade: scoringState.grade,
-                  totalScore: scoringState.totalScore,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Save Button
-            if (onSave != null)
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: isSaving ? null : onSave,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                  child: isSaving
-                      ? const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 20,
-                              height: 20,
+                
+                // Save Button
+                if (onSave != null)
+                  SizedBox(
+                    height: 44,
+                    child: ElevatedButton.icon(
+                      onPressed: isSaving ? null : onSave,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: isSaving
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
                               child: CircularProgressIndicator(
                                 color: Colors.white,
-                                strokeWidth: 2.5,
+                                strokeWidth: 2,
                               ),
-                            ),
-                            SizedBox(width: 12),
-                            Text(
-                              'Menyimpan...',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        )
-                      : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.save_rounded, size: 20),
-                            SizedBox(width: 10),
-                            Text(
-                              'Simpan Nilai',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
+                            )
+                          : const Icon(Icons.save_rounded, size: 18),
+                      label: Text(
+                        isSaving ? 'Menyimpan...' : 'Simpan',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
                         ),
-                ),
-              )
-            else
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: AppTheme.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppTheme.error.withValues(alpha: 0.3)),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.lock_outline_rounded, color: AppTheme.error, size: 20),
-                    SizedBox(width: 8),
-                    Text(
-                      'Nilai Terkunci oleh Admin',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.error,
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.lock_outline_rounded, color: AppTheme.error, size: 16),
+                        SizedBox(width: 4),
+                        Text(
+                          'Terkunci',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.error,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
