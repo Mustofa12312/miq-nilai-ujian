@@ -10,6 +10,7 @@ class AssignmentModel {
   final int? rantingId;
   final String? rantingName;
   final String? room;
+  final String? gender;
   final int totalStudents;
   final int scoredStudents;
   final int examTypeId;
@@ -26,6 +27,7 @@ class AssignmentModel {
     this.rantingId,
     this.rantingName,
     this.room,
+    this.gender,
     required this.totalStudents,
     required this.scoredStudents,
     this.examTypeId = 1,
@@ -49,6 +51,7 @@ class AssignmentModel {
       rantingId: rantingId,
       rantingName: rantingName,
       room: room,
+      gender: gender,
       totalStudents: totalStudents,
       scoredStudents: scoredStudents ?? this.scoredStudents,
       examTypeId: examTypeId,
@@ -78,6 +81,7 @@ class AssignmentModel {
       rantingId: json['ranting_id'] != null ? (json['ranting_id'] as num).toInt() : null,
       rantingName: rantingData['name'] as String?,
       room: json['room'] as String?,
+      gender: json['gender'] as String?,
       totalStudents: totalStudents,
       scoredStudents: scoredStudents,
       examTypeId: defaultExamTypeId,

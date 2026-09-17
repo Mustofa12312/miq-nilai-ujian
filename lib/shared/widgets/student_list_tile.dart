@@ -95,7 +95,8 @@ class StudentListTile extends StatelessWidget {
                           Text(
                             [
                               if (student.nis != null && student.nis!.isNotEmpty) 'NIS: ${student.nis}',
-                              if (student.gender != null && student.gender!.isNotEmpty) student.gender,
+                              if (student.gender != null && student.gender!.isNotEmpty) 
+                                student.gender?.toUpperCase() == 'L' ? 'Laki-laki (L)' : (student.gender?.toUpperCase() == 'P' ? 'Perempuan (P)' : student.gender),
                             ].join(' • '),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: isDark ? AppTheme.onSurfaceVariantDark : AppTheme.onSurfaceVariantLight,
@@ -172,10 +173,7 @@ class StudentListTile extends StatelessWidget {
               end: Alignment.bottomRight,
               colors: isScored
                   ? [AppTheme.primary, AppTheme.primaryDark]
-                  : [
-                      const Color(0xFF94A3B8),
-                      const Color(0xFF64748B),
-                    ],
+                  : _getGenderColors(student.gender),
             ),
           ),
           child: Center(
@@ -191,5 +189,15 @@ class StudentListTile extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  List<Color> _getGenderColors(String? gender) {
+    if (gender?.toUpperCase() == 'L') {
+      return [const Color(0xFF3B82F6), const Color(0xFF2563EB)]; // Blue for Laki-laki
+    } else if (gender?.toUpperCase() == 'P') {
+      return [const Color(0xFFEC4899), const Color(0xFFDB2777)]; // Pink for Perempuan
+    }
+    // Default Gray
+    return [const Color(0xFF94A3B8), const Color(0xFF64748B)];
   }
 }
