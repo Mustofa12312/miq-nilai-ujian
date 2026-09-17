@@ -205,7 +205,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                                   const Text('Lanjutkan Penilaian', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Kelas ${resumeAssignment.className} - ${resumeAssignment.periodName}',
+                                    'Kelas ${resumeAssignment.className}${resumeAssignment.rantingName != null ? ' • ${resumeAssignment.rantingName!.replaceAll(RegExp(r'ranting\s*', caseSensitive: false), '').trim()}' : ''}',
                                     style: TextStyle(color: isDark ? AppTheme.onSurfaceVariantDark : AppTheme.onSurfaceVariantLight, fontSize: 13),
                                   ),
                                 ],
@@ -598,9 +598,9 @@ class _AssignmentCard extends StatelessWidget {
                           child: Text(
                             assignment.className,
                             style: const TextStyle(
-                              color: Colors.white,
+                              fontSize: 22,
                               fontWeight: FontWeight.w800,
-                              fontSize: 14,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -651,6 +651,18 @@ class _AssignmentCard extends StatelessWidget {
                                     : AppTheme.onSurfaceVariantLight,
                               ),
                             ),
+                            if (assignment.room != null && assignment.room!.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  'Ruang: ${assignment.room}',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? AppTheme.primaryDark : AppTheme.primary,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),

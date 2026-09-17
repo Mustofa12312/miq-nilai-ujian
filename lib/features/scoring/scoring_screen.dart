@@ -89,19 +89,21 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
           .read(assignmentProvider.notifier)
           .updateScoredCount(widget.assignmentId);
 
+      // Show success animation
+      setState(() => _showSuccess = true);
+      _successController.forward();
       HapticFeedback.heavyImpact();
 
-      // Removed success animation, navigate immediately
+      // Wait a moment for animation
+      await Future.delayed(const Duration(milliseconds: 1200));
+
       if (mounted) {
+        _successController.reset();
+        setState(() => _showSuccess = false);
         ref.read(scoringProvider.notifier).reset();
         
-        final pending = ref.read(studentProvider).pending;
-        if (pending.isNotEmpty) {
-          final nextStudent = pending.first;
-          context.replace('/scoring/${nextStudent.id}?classId=${widget.classId}');
-        } else {
-          context.pop();
-        }
+        // Return to student list directly
+        context.pop();
       }
     } else {
       // Tampilkan error jika ada
@@ -144,15 +146,16 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            Text(
-              '${assignment?.levelName ?? ''} · Kelas ${assignment?.className ?? ''}',
-              style: TextStyle(
-                fontSize: 12,
-                color: isDark
-                    ? AppTheme.onSurfaceVariantDark
-                    : AppTheme.onSurfaceVariantLight,
+            if (student?.branchName != null && student!.branchName!.isNotEmpty)
+              Text(
+                student.branchName!,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark
+                      ? AppTheme.onSurfaceVariantDark
+                      : AppTheme.onSurfaceVariantLight,
+                ),
               ),
-            ),
           ],
         ),
       ),
