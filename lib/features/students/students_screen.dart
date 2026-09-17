@@ -181,34 +181,7 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          HapticFeedback.lightImpact();
-          final scannedCode = await showDialog<String>(
-            context: context,
-            builder: (ctx) => const QRScannerDialog(),
-          );
-          
-          if (scannedCode != null && context.mounted) {
-            // Cek apakah santri ini ada di kelas ini (berdasarkan NIS atau ID fallback)
-            final student = filtered.where((s) => s.nis == scannedCode || s.id.toString() == scannedCode).firstOrNull;
-            if (student != null) {
-              context.push('/scoring/${student.id}?classId=${widget.classId}');
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Santri tidak ditemukan di kelas ini.'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
-        },
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.qr_code_scanner_rounded),
-        label: const Text('Scan QR', style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
+
     );
   }
 
