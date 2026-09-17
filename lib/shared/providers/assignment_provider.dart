@@ -20,7 +20,8 @@ class AssignmentNotifier extends StateNotifier<List<AssignmentModel>> {
       final examTypeRes = await supabase
           .from('exam_types')
           .select('id')
-          .eq('active', true)
+          .order('id')
+          .limit(1)
           .maybeSingle();
 
       if (periodRes == null) {

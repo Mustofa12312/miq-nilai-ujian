@@ -167,7 +167,8 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
         final examTypeRes = await supabase
             .from('exam_types')
             .select('id')
-            .eq('active', true)
+            .order('id')
+            .limit(1)
             .maybeSingle();
         activeExamTypeId = examTypeRes != null
             ? (examTypeRes['id'] as num).toInt()
