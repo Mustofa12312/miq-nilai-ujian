@@ -40,11 +40,14 @@ class StudentModel {
   });
 
   String get initials {
-    final parts = fullName.split(' ');
+    if (fullName.trim().isEmpty) return '?';
+    final parts = fullName.trim().split(RegExp(r'\s+'));
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
     }
-    return fullName.substring(0, 2).toUpperCase();
+    return fullName.length >= 2
+        ? fullName.substring(0, 2).toUpperCase()
+        : fullName.toUpperCase();
   }
 
   StudentModel copyWith({
