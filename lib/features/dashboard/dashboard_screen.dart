@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../core/theme/app_theme.dart';
 import '../../shared/models/assignment_model.dart';
 import '../../shared/providers/auth_provider.dart';
@@ -10,7 +11,6 @@ import '../../shared/providers/assignment_provider.dart';
 import '../../shared/widgets/stat_card.dart';
 import '../../shared/providers/sync_provider.dart';
 import '../../app.dart';
-
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -38,22 +38,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final totalStats = ref.watch(totalStatsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final themeMode = ref.watch(themeModeProvider);
-    
+
     // Trigger auto-sync
     ref.watch(autoSyncProvider);
     final isSyncing = ref.watch(syncStateProvider);
 
     // Find assignment to resume
     final resumeAssignment = assignments.cast<AssignmentModel?>().firstWhere(
-      (a) => a != null && a.scoredStudents > 0 && a.scoredStudents < a.totalStudents,
+      (a) =>
+          a != null &&
+          a.scoredStudents > 0 &&
+          a.scoredStudents < a.totalStudents,
       orElse: () => null,
     );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-            isDark ? Brightness.light : Brightness.dark,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
       child: Scaffold(
         body: CustomScrollView(
@@ -63,8 +65,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               expandedHeight: 180,
               floating: false,
               pinned: true,
-              backgroundColor:
-                  isDark ? AppTheme.surfaceDark : AppTheme.surfaceLight,
+              backgroundColor: isDark
+                  ? AppTheme.surfaceDark
+                  : AppTheme.surfaceLight,
               surfaceTintColor: Colors.transparent,
               actions: [
                 IconButton(
@@ -75,10 +78,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ),
                   tooltip: 'Ganti tema',
                   onPressed: () {
-                    ref.read(themeModeProvider.notifier).state =
-                        themeMode == ThemeMode.dark
-                            ? ThemeMode.light
-                            : ThemeMode.dark;
+                    ref
+                        .read(themeModeProvider.notifier)
+                        .state = themeMode == ThemeMode.dark
+                        ? ThemeMode.light
+                        : ThemeMode.dark;
                   },
                 ),
                 if (isSyncing)
@@ -86,8 +90,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     padding: EdgeInsets.only(right: 8.0),
                     child: Center(
                       child: SizedBox(
-                        width: 16, height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppTheme.primary,
+                        ),
                       ),
                     ),
                   ),
@@ -115,8 +123,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
 
             SliverPadding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   // ── Stats Row ──────────────────────────────────────────
@@ -155,25 +162,24 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ],
                   ),
 
+                  const SizedBox(height: 12),
 
                   // ── Section Title ──────────────────────────────────────
                   Animate(
-                    effects: [
-                      FadeEffect(duration: 300.ms, delay: 250.ms),
-                    ],
+                    effects: [FadeEffect(duration: 300.ms, delay: 250.ms)],
                     child: Row(
                       children: [
                         Text(
                           'Tugas Hari Ini',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
+                          style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.w800),
                         ),
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
                           decoration: BoxDecoration(
                             color: AppTheme.primary.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
@@ -191,7 +197,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 20),
 
                   // ── Assignment Cards ────────────────────────────────────
                   if (assignments.isEmpty)
@@ -221,11 +227,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   String _getGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 11) return 'Selamat Pagi,';
-    if (hour < 15) return 'Selamat Siang,';
-    if (hour < 18) return 'Selamat Sore,';
-    return 'Selamat Malam,';
+    return 'Assalamualaikum Wr. Wb.,';
   }
 
   Widget _buildHeader(BuildContext context, String name, bool isDark) {
@@ -326,7 +328,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Animate(
       effects: [
         FadeEffect(duration: 500.ms, delay: 300.ms),
-        SlideEffect(begin: const Offset(0, 0.05), duration: 500.ms, delay: 300.ms, curve: Curves.easeOut),
+        SlideEffect(
+          begin: const Offset(0, 0.05),
+          duration: 500.ms,
+          delay: 300.ms,
+          curve: Curves.easeOut,
+        ),
       ],
       child: Container(
         margin: const EdgeInsets.only(top: 10),
@@ -352,18 +359,22 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.05),
-                    shape: BoxShape.circle,
-                  ),
-                ).animate(onPlay: (controller) => controller.repeat(reverse: true)).scale(
-                  begin: const Offset(0.9, 0.9),
-                  end: const Offset(1.1, 1.1),
-                  duration: 1500.ms,
-                  curve: Curves.easeInOut,
-                ),
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.05),
+                        shape: BoxShape.circle,
+                      ),
+                    )
+                    .animate(
+                      onPlay: (controller) => controller.repeat(reverse: true),
+                    )
+                    .scale(
+                      begin: const Offset(0.9, 0.9),
+                      end: const Offset(1.1, 1.1),
+                      duration: 1500.ms,
+                      curve: Curves.easeInOut,
+                    ),
                 Container(
                   width: 72,
                   height: 72,
@@ -390,9 +401,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             Text(
               'Yeay, Bebas Tugas! 🎉',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: isDark ? Colors.white : const Color(0xFF1E293B),
-                  ),
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : const Color(0xFF1E293B),
+              ),
             ),
             const SizedBox(height: 12),
             Text(
@@ -412,7 +423,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 HapticFeedback.lightImpact();
                 final user = ref.read(currentUserProvider);
                 if (user != null) {
-                  ref.read(assignmentProvider.notifier).loadAssignments(user.id);
+                  ref
+                      .read(assignmentProvider.notifier)
+                      .loadAssignments(user.id);
                 }
               },
               icon: const Icon(Icons.refresh_rounded, size: 18),
@@ -420,7 +433,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.primary,
                 side: const BorderSide(color: AppTheme.primary, width: 1.5),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -471,9 +487,7 @@ class _AssignmentCard extends StatelessWidget {
           border: Border.all(
             color: isComplete
                 ? AppTheme.primary.withValues(alpha: 0.3)
-                : (isDark
-                    ? const Color(0xFF1E2939)
-                    : const Color(0xFFE2E8F0)),
+                : (isDark ? const Color(0xFF1E2939) : const Color(0xFFE2E8F0)),
             width: 1.2,
           ),
           boxShadow: [
@@ -546,22 +560,28 @@ class _AssignmentCard extends StatelessWidget {
                             const SizedBox(height: 2),
                             Text(
                               'Kelas ${assignment.className}',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w700),
                             ),
                             if (assignment.rantingName != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Text(
-                                  assignment.rantingName!.replaceAll(RegExp(r'ranting\s*', caseSensitive: false), '').trim(),
+                                  assignment.rantingName!
+                                      .replaceAll(
+                                        RegExp(
+                                          r'ranting\s*',
+                                          caseSensitive: false,
+                                        ),
+                                        '',
+                                      )
+                                      .trim(),
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: isDark ? AppTheme.primaryDark : AppTheme.primary,
+                                    color: isDark
+                                        ? AppTheme.primaryDark
+                                        : AppTheme.primary,
                                   ),
                                 ),
                               ),
@@ -574,7 +594,8 @@ class _AssignmentCard extends StatelessWidget {
                                     : AppTheme.onSurfaceVariantLight,
                               ),
                             ),
-                            if (assignment.room != null && assignment.room!.isNotEmpty)
+                            if (assignment.room != null &&
+                                assignment.room!.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Text(
@@ -582,7 +603,9 @@ class _AssignmentCard extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
-                                    color: isDark ? AppTheme.primaryDark : AppTheme.primary,
+                                    color: isDark
+                                        ? AppTheme.primaryDark
+                                        : AppTheme.primary,
                                   ),
                                 ),
                               ),
@@ -593,7 +616,9 @@ class _AssignmentCard extends StatelessWidget {
                       if (isComplete)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
                             color: AppTheme.success.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(10),
@@ -665,7 +690,9 @@ class _AssignmentCard extends StatelessWidget {
                       children: [
                         Container(
                           height: 8,
-                          color: isDark ? AppTheme.surfaceVariantDark : AppTheme.surfaceVariantLight,
+                          color: isDark
+                              ? AppTheme.surfaceVariantDark
+                              : AppTheme.surfaceVariantLight,
                         ),
                         AnimatedContainer(
                           duration: 800.ms,
@@ -681,10 +708,14 @@ class _AssignmentCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: (isComplete ? AppTheme.success : AppTheme.primary).withValues(alpha: 0.5),
+                                color:
+                                    (isComplete
+                                            ? AppTheme.success
+                                            : AppTheme.primary)
+                                        .withValues(alpha: 0.5),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -699,21 +730,31 @@ class _AssignmentCard extends StatelessWidget {
                     height: 48,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: isComplete ? [] : [
-                        BoxShadow(
-                          color: AppTheme.primary.withValues(alpha: 0.25),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        )
-                      ],
+                      boxShadow: isComplete
+                          ? []
+                          : [
+                              BoxShadow(
+                                color: AppTheme.primary.withValues(alpha: 0.25),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
                     ),
                     child: isComplete
                         ? OutlinedButton.icon(
                             onPressed: onTap,
-                            icon: const Icon(Icons.visibility_outlined, size: 18),
-                            label: const Text('Lihat Detail', style: TextStyle(fontWeight: FontWeight.w700)),
+                            icon: const Icon(
+                              Icons.visibility_outlined,
+                              size: 18,
+                            ),
+                            label: const Text(
+                              'Lihat Detail',
+                              style: TextStyle(fontWeight: FontWeight.w700),
+                            ),
                             style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
                           )
                         : ElevatedButton(
@@ -722,12 +763,17 @@ class _AssignmentCard extends StatelessWidget {
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               padding: EdgeInsets.zero,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
                             ),
                             child: Ink(
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [AppTheme.primary, AppTheme.primaryDark],
+                                  colors: [
+                                    AppTheme.primary,
+                                    AppTheme.primaryDark,
+                                  ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
@@ -738,11 +784,20 @@ class _AssignmentCard extends StatelessWidget {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.white),
+                                    const Icon(
+                                      Icons.arrow_forward_rounded,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      assignment.scoredStudents > 0 ? 'Lanjut Penilaian' : 'Mulai Penilaian',
-                                      style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+                                      assignment.scoredStudents > 0
+                                          ? 'Lanjut Penilaian'
+                                          : 'Mulai Penilaian',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ],
                                 ),
