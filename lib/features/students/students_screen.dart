@@ -39,11 +39,13 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
       // Ambil context periode dan exam_type dari assignment yang sudah di-load
       final assignment = ref
           .read(assignmentProvider.notifier)
-          .getByClassId(widget.classId);
+          .getById(widget.assignmentId);
       ref.read(studentProvider.notifier).loadStudents(
             widget.classId,
             periodId: assignment?.periodId,
             examTypeId: assignment?.examTypeId,
+            rantingId: assignment?.rantingId,
+            room: assignment?.room,
           );
     });
     _searchCtrl.addListener(() {
@@ -63,7 +65,7 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
     final studentState = ref.watch(studentProvider);
     final assignment = ref
         .watch(assignmentProvider.notifier)
-        .getByClassId(widget.classId);
+        .getById(widget.assignmentId);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final filtered = studentState.filtered;
@@ -82,7 +84,11 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             Text(
-              assignment?.levelName ?? '',
+              [
+                assignment?.levelName ?? '',
+                if (assignment?.rantingName != null) assignment!.rantingName!,
+                if (assignment?.room != null) 'Ruang: ${assignment!.room!}'
+              ].where((s) => s.isNotEmpty).join(' • '),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,

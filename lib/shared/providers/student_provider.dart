@@ -35,25 +35,35 @@ class StudentState {
   int get scoredCount => scored.length;
   int get pendingCount => pending.length;
 
-  /// Group students by branch name (ranting) for display
+  /// Group students by room (if available) or ranting name for display
   Map<String, List<StudentModel>> get groupedByRanting {
     final map = <String, List<StudentModel>>{};
     for (final s in filtered) {
-      final key = (s.branchName?.isNotEmpty == true ? s.branchName! : s.branchCode) ?? 'Lainnya';
+      String key;
+      if (s.room != null && s.room!.isNotEmpty) {
+        key = 'Ruang/Halaqoh: ${s.room!}';
+      } else {
+        key = (s.branchName?.isNotEmpty == true ? s.branchName! : s.branchCode) ?? 'Lainnya';
+      }
       map.putIfAbsent(key, () => []).add(s);
     }
     return map;
   }
 
-  /// Get scored count for a specific ranting name
-  int getScoredCountForRanting(String rantingName) {
-    return groupedStudentsForRanting(rantingName).where((s) => s.isScored).length;
+  /// Get scored count for a specific grouping name
+  int getScoredCountForRanting(String groupName) {
+    return groupedStudentsForRanting(groupName).where((s) => s.isScored).length;
   }
 
-  List<StudentModel> groupedStudentsForRanting(String rantingName) {
+  List<StudentModel> groupedStudentsForRanting(String groupName) {
     return students.where((s) {
-      final key = (s.branchName?.isNotEmpty == true ? s.branchName! : s.branchCode) ?? 'Lainnya';
-      return key == rantingName;
+      String key;
+      if (s.room != null && s.room!.isNotEmpty) {
+        key = 'Ruang/Halaqoh: ${s.room!}';
+      } else {
+        key = (s.branchName?.isNotEmpty == true ? s.branchName! : s.branchCode) ?? 'Lainnya';
+      }
+      return key == groupName;
     }).toList();
   }
 
@@ -78,16 +88,25 @@ class StudentNotifier extends StateNotifier<StudentState> {
   StudentNotifier(this.localStorage) : super(const StudentState());
 
   /// Muat santri dari Supabase, difilter per periode aktif
-  Future<void> loadStudents(int classId, {int? periodId, int? examTypeId}) async {
+  Future<void> loadStudents(int classId, {int? periodId, int? examTypeId, int? rantingId, String? room}) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       // 1. Ambil daftar santri aktif di kelas ini
-      final studentsRes = await supabase
+      var query = supabase
           .from('students')
-          .select('id, class_id, ranting_id, nis, full_name, gender, father_name, branch_code, branch_name, birth_place, birth_date, active')
+          .select('id, class_id, ranting_id, room, nis, full_name, gender, father_name, branch_code, branch_name, birth_place, birth_date, active')
           .eq('class_id', classId)
-          .eq('active', true)
+          .eq('active', true);
+      
+      if (rantingId != null) {
+        query = query.eq('ranting_id', rantingId);
+      }
+      if (room != null && room.isNotEmpty) {
+        query = query.eq('room', room);
+      }
+
+      final studentsRes = await query
           .order('branch_name', ascending: true)
           .order('full_name', ascending: true);
 
@@ -166,6 +185,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
           'branch_name': s.branchName,
           'birth_place': s.birthPlace,
           'birth_date': s.birthDate,
+          'room': s.room,
           'active': s.active,
           'is_scored': s.isScored,
           'total_score': s.totalScore,
@@ -192,6 +212,7 @@ class StudentNotifier extends StateNotifier<StudentState> {
               branchName: json['branch_name'] as String?,
               birthPlace: json['birth_place'] as String?,
               birthDate: json['birth_date'] as String?,
+              room: json['room'] as String?,
               active: json['active'] as bool? ?? true,
               isScored: json['is_scored'] as bool? ?? false,
               totalScore: (json['total_score'] as num?)?.toDouble(),

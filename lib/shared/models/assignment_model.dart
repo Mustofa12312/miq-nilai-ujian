@@ -7,6 +7,9 @@ class AssignmentModel {
   final String levelName;
   final int classId;
   final String className;
+  final int? rantingId;
+  final String? rantingName;
+  final String? room;
   final int totalStudents;
   final int scoredStudents;
   final int examTypeId;
@@ -20,6 +23,9 @@ class AssignmentModel {
     required this.levelName,
     required this.classId,
     required this.className,
+    this.rantingId,
+    this.rantingName,
+    this.room,
     required this.totalStudents,
     required this.scoredStudents,
     this.examTypeId = 1,
@@ -40,14 +46,15 @@ class AssignmentModel {
       levelName: levelName,
       classId: classId,
       className: className,
+      rantingId: rantingId,
+      rantingName: rantingName,
+      room: room,
       totalStudents: totalStudents,
       scoredStudents: scoredStudents ?? this.scoredStudents,
       examTypeId: examTypeId,
     );
   }
 
-  /// Parse dari response Supabase join:
-  /// examiner_assignments → classes → levels + exam_periods
   factory AssignmentModel.fromJson(
     Map<String, dynamic> json, {
     required int totalStudents,
@@ -57,6 +64,7 @@ class AssignmentModel {
     final classData = json['class'] as Map<String, dynamic>? ?? {};
     final levelData = classData['level'] as Map<String, dynamic>? ?? {};
     final periodData = json['period'] as Map<String, dynamic>? ?? {};
+    final rantingData = json['ranting'] as Map<String, dynamic>? ?? {};
 
     return AssignmentModel(
       id: (json['id'] as num).toInt(),
@@ -67,6 +75,9 @@ class AssignmentModel {
       levelName: levelData['name'] as String? ?? '',
       classId: (json['class_id'] as num).toInt(),
       className: classData['name'] as String? ?? '',
+      rantingId: json['ranting_id'] != null ? (json['ranting_id'] as num).toInt() : null,
+      rantingName: rantingData['name'] as String?,
+      room: json['room'] as String?,
       totalStudents: totalStudents,
       scoredStudents: scoredStudents,
       examTypeId: defaultExamTypeId,

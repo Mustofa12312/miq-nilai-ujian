@@ -574,6 +574,21 @@ class _AssignmentCard extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                   ),
                             ),
+                            if (assignment.rantingName != null || assignment.room != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  [
+                                    if (assignment.rantingName != null) assignment.rantingName,
+                                    if (assignment.room != null) 'Ruang: ${assignment.room}'
+                                  ].join(' • '),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? AppTheme.primaryDark : AppTheme.primary,
+                                  ),
+                                ),
+                              ),
                             Text(
                               assignment.periodName,
                               style: TextStyle(

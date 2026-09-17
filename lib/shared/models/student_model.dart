@@ -10,6 +10,7 @@ class StudentModel {
   final String? branchName;
   final String? birthPlace;
   final String? birthDate;
+  final String? room;
   final bool active;
   final bool isScored;
   final double? totalScore;
@@ -29,6 +30,7 @@ class StudentModel {
     this.branchName,
     this.birthPlace,
     this.birthDate,
+    this.room,
     required this.active,
     required this.isScored,
     this.totalScore,
@@ -64,6 +66,7 @@ class StudentModel {
       branchName: branchName,
       birthPlace: birthPlace,
       birthDate: birthDate,
+      room: room,
       active: active,
       isScored: isScored ?? this.isScored,
       totalScore: totalScore ?? this.totalScore,
@@ -97,6 +100,7 @@ class StudentModel {
       branchName: json['branch_name'] as String?,
       birthPlace: json['birth_place'] as String?,
       birthDate: json['birth_date'] as String?,
+      room: json['room'] as String?,
       active: json['active'] as bool? ?? true,
       isScored: isScored,
       totalScore: isScored && scoreData != null

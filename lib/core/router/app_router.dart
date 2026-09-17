@@ -83,11 +83,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final studentId = int.parse(state.pathParameters['studentId']!);
           final classId =
               int.tryParse(state.uri.queryParameters['classId'] ?? '') ?? 0;
+          final assignmentId =
+              int.tryParse(state.uri.queryParameters['assignmentId'] ?? '') ?? 0;
           return CustomTransitionPage(
             key: state.pageKey,
             child: ScoringScreen(
               studentId: studentId,
               classId: classId,
+              assignmentId: assignmentId,
             ),
             transitionsBuilder: _slideLeftTransition,
           );

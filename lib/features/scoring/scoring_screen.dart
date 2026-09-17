@@ -16,11 +16,13 @@ import '../../shared/widgets/grade_badge.dart';
 class ScoringScreen extends ConsumerStatefulWidget {
   final int studentId;
   final int classId;
+  final int assignmentId;
 
   const ScoringScreen({
     super.key,
     required this.studentId,
     required this.classId,
+    required this.assignmentId,
   });
 
   @override
@@ -85,7 +87,7 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
       // Update assignment progress
       ref
           .read(assignmentProvider.notifier)
-          .updateScoredCount(widget.classId);
+          .updateScoredCount(widget.assignmentId);
 
       // Show success animation
       setState(() => _showSuccess = true);
@@ -135,7 +137,7 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
 
     final assignment = ref
         .watch(assignmentProvider.notifier)
-        .getByClassId(widget.classId);
+        .getById(widget.assignmentId);
 
     return Scaffold(
       appBar: AppBar(
