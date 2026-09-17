@@ -35,6 +35,28 @@ class StudentState {
   int get scoredCount => scored.length;
   int get pendingCount => pending.length;
 
+  /// Group students by branch name (ranting) for display
+  Map<String, List<StudentModel>> get groupedByRanting {
+    final map = <String, List<StudentModel>>{};
+    for (final s in filtered) {
+      final key = (s.branchName?.isNotEmpty == true ? s.branchName! : s.branchCode) ?? 'Lainnya';
+      map.putIfAbsent(key, () => []).add(s);
+    }
+    return map;
+  }
+
+  /// Get scored count for a specific ranting name
+  int getScoredCountForRanting(String rantingName) {
+    return groupedStudentsForRanting(rantingName).where((s) => s.isScored).length;
+  }
+
+  List<StudentModel> groupedStudentsForRanting(String rantingName) {
+    return students.where((s) {
+      final key = (s.branchName?.isNotEmpty == true ? s.branchName! : s.branchCode) ?? 'Lainnya';
+      return key == rantingName;
+    }).toList();
+  }
+
   StudentState copyWith({
     List<StudentModel>? students,
     String? searchQuery,
@@ -63,9 +85,10 @@ class StudentNotifier extends StateNotifier<StudentState> {
       // 1. Ambil daftar santri aktif di kelas ini
       final studentsRes = await supabase
           .from('students')
-          .select('id, class_id, nis, full_name, gender, father_name, branch_code, branch_name, active')
+          .select('id, class_id, ranting_id, nis, full_name, gender, father_name, branch_code, branch_name, birth_place, birth_date, active')
           .eq('class_id', classId)
           .eq('active', true)
+          .order('branch_name', ascending: true)
           .order('full_name', ascending: true);
 
       if (studentsRes.isEmpty) {
@@ -134,12 +157,15 @@ class StudentNotifier extends StateNotifier<StudentState> {
         final dataToCache = newList.map((s) => {
           'id': s.id,
           'class_id': s.classId,
+          'ranting_id': s.rantingId,
           'nis': s.nis,
           'full_name': s.fullName,
           'gender': s.gender,
           'father_name': s.fatherName,
           'branch_code': s.branchCode,
           'branch_name': s.branchName,
+          'birth_place': s.birthPlace,
+          'birth_date': s.birthDate,
           'active': s.active,
           'is_scored': s.isScored,
           'total_score': s.totalScore,
@@ -157,12 +183,15 @@ class StudentNotifier extends StateNotifier<StudentState> {
             students: cached.map((json) => StudentModel(
               id: (json['id'] as num).toInt(),
               classId: (json['class_id'] as num).toInt(),
+              rantingId: json['ranting_id'] != null ? (json['ranting_id'] as num).toInt() : null,
               nis: json['nis'] as String?,
               fullName: json['full_name'] as String,
               gender: json['gender'] as String?,
               fatherName: json['father_name'] as String?,
               branchCode: json['branch_code'] as String?,
               branchName: json['branch_name'] as String?,
+              birthPlace: json['birth_place'] as String?,
+              birthDate: json['birth_date'] as String?,
               active: json['active'] as bool? ?? true,
               isScored: json['is_scored'] as bool? ?? false,
               totalScore: (json['total_score'] as num?)?.toDouble(),

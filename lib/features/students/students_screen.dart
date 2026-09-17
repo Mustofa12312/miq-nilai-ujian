@@ -8,6 +8,7 @@ import '../../shared/providers/assignment_provider.dart';
 import '../../shared/providers/student_provider.dart';
 import '../../shared/widgets/progress_header.dart';
 import '../../shared/widgets/student_list_tile.dart';
+import '../../shared/models/student_model.dart';
 import 'widgets/qr_scanner_dialog.dart';
 
 class StudentsScreen extends ConsumerStatefulWidget {
@@ -28,6 +29,7 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
     with SingleTickerProviderStateMixin {
   final _searchCtrl = TextEditingController();
   late TabController _tabController;
+  bool _groupByRanting = true;
 
   @override
   void initState() {
@@ -67,6 +69,8 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
     final filtered = studentState.filtered;
     final pending = filtered.where((s) => !s.isScored).toList();
     final scored = filtered.where((s) => s.isScored).toList();
+
+    final hasMultipleRantings = studentState.groupedByRanting.length > 1;
 
     return Scaffold(
       appBar: AppBar(
@@ -159,7 +163,9 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
                     controller: _tabController,
                     children: [
                       // Tab 1: Belum Dinilai
-                      _buildList(context, pending, isDark),
+                      _groupByRanting && hasMultipleRantings && _searchCtrl.text.isEmpty
+                          ? _buildGroupedList(context, pending, isDark)
+                          : _buildList(context, pending, isDark),
                       // Tab 2: Sudah Dinilai
                       _buildList(context, scored, isDark, isScored: true),
                     ],
@@ -198,6 +204,145 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
     );
   }
 
+  // ── Grouped by Ranting view ────────────────────────────────────────
+  Widget _buildGroupedList(BuildContext context, List<StudentModel> students, bool isDark) {
+    if (students.isEmpty) {
+      return _buildEmpty(isDark, 'Semua santri sudah dinilai! 🎉', 'Penilaian kelas ini sudah selesai.');
+    }
+
+    // Group by ranting
+    final grouped = <String, List<StudentModel>>{};
+    for (final s in students) {
+      final key = (s.branchName?.isNotEmpty == true ? s.branchName! : s.branchCode) ?? 'Lainnya';
+      grouped.putIfAbsent(key, () => []).add(s);
+    }
+
+    // All students (for progress per ranting)
+    final allStudents = ref.read(studentProvider).students;
+
+    final entries = grouped.entries.toList();
+
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
+      itemCount: entries.length,
+      itemBuilder: (context, gi) {
+        final rantingName = entries[gi].key;
+        final rantingStudents = entries[gi].value;
+
+        // Total santri di ranting ini (termasuk yang sudah dinilai)
+        final allInRanting = allStudents.where((s) {
+          final key = (s.branchName?.isNotEmpty == true ? s.branchName! : s.branchCode) ?? 'Lainnya';
+          return key == rantingName;
+        }).toList();
+        final totalInRanting = allInRanting.length;
+        final scoredInRanting = allInRanting.where((s) => s.isScored).length;
+        final pendingInRanting = totalInRanting - scoredInRanting;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Ranting Header
+            Animate(
+              effects: [FadeEffect(duration: 300.ms, delay: (gi * 40).ms)],
+              child: Container(
+                margin: EdgeInsets.only(bottom: 8, top: gi == 0 ? 0 : 16),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primary.withValues(alpha: 0.08),
+                      AppTheme.primary.withValues(alpha: 0.02),
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: AppTheme.primary.withValues(alpha: 0.15),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.account_balance_rounded, size: 18, color: AppTheme.primary),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            rantingName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '$pendingInRanting belum dinilai · $scoredInRanting sudah',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark ? AppTheme.onSurfaceVariantDark : AppTheme.onSurfaceVariantLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Mini progress indicator
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: scoredInRanting == totalInRanting
+                            ? AppTheme.success.withValues(alpha: 0.12)
+                            : AppTheme.warning.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '$scoredInRanting/$totalInRanting',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: scoredInRanting == totalInRanting ? AppTheme.success : AppTheme.warning,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Student tiles for this ranting
+            ...rantingStudents.asMap().entries.map((e) {
+              final student = e.value;
+              final i = e.key;
+              return Animate(
+                effects: [
+                  FadeEffect(duration: 300.ms, delay: (gi * 40 + i * 30).ms),
+                  SlideEffect(begin: const Offset(0.02, 0), duration: 300.ms, delay: (gi * 40 + i * 30).ms),
+                ],
+                child: StudentListTile(
+                  student: student,
+                  index: i,
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    context.push('/scoring/${student.id}?classId=${widget.classId}');
+                  },
+                ),
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildList(
     BuildContext context,
     List students,
@@ -223,6 +368,7 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen>
           student: student,
           index: i,
           onTap: () {
+            HapticFeedback.lightImpact();
             context.push(
               '/scoring/${student.id}?classId=${widget.classId}',
             );
@@ -338,7 +484,7 @@ class _SearchBar extends StatelessWidget {
       child: TextField(
         controller: controller,
         decoration: InputDecoration(
-          hintText: 'Cari nama santri...',
+          hintText: 'Cari nama santri atau ranting...',
           prefixIcon: const Icon(Icons.search_rounded, size: 22),
           suffixIcon: controller.text.isNotEmpty
               ? IconButton(

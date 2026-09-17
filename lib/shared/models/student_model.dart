@@ -1,12 +1,15 @@
 class StudentModel {
   final int id;
   final int classId;
+  final int? rantingId;
   final String? nis;
   final String fullName;
   final String? gender;
   final String? fatherName;
   final String? branchCode;
   final String? branchName;
+  final String? birthPlace;
+  final String? birthDate;
   final bool active;
   final bool isScored;
   final double? totalScore;
@@ -17,12 +20,15 @@ class StudentModel {
   const StudentModel({
     required this.id,
     required this.classId,
+    this.rantingId,
     this.nis,
     required this.fullName,
     this.gender,
     this.fatherName,
     this.branchCode,
     this.branchName,
+    this.birthPlace,
+    this.birthDate,
     required this.active,
     required this.isScored,
     this.totalScore,
@@ -49,12 +55,15 @@ class StudentModel {
     return StudentModel(
       id: id,
       classId: classId,
+      rantingId: rantingId,
       nis: nis,
       fullName: fullName,
       gender: gender,
       fatherName: fatherName,
       branchCode: branchCode,
       branchName: branchName,
+      birthPlace: birthPlace,
+      birthDate: birthDate,
       active: active,
       isScored: isScored ?? this.isScored,
       totalScore: totalScore ?? this.totalScore,
@@ -79,12 +88,15 @@ class StudentModel {
     return StudentModel(
       id: id,
       classId: (json['class_id'] as num).toInt(),
+      rantingId: json['ranting_id'] != null ? (json['ranting_id'] as num).toInt() : null,
       nis: json['nis'] as String?,
       fullName: json['full_name'] as String? ?? '',
       gender: json['gender'] as String?,
       fatherName: json['father_name'] as String?,
       branchCode: json['branch_code'] as String?,
       branchName: json['branch_name'] as String?,
+      birthPlace: json['birth_place'] as String?,
+      birthDate: json['birth_date'] as String?,
       active: json['active'] as bool? ?? true,
       isScored: isScored,
       totalScore: isScored && scoreData != null
