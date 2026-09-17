@@ -162,39 +162,51 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     Animate(
                       effects: [
                         FadeEffect(duration: 400.ms, delay: 100.ms),
-                        SlideEffect(begin: const Offset(0, 0.2), duration: 400.ms),
+                        SlideEffect(begin: const Offset(0, 0.2), duration: 400.ms, curve: Curves.easeOutCubic),
                       ],
                       child: Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [AppTheme.primary.withValues(alpha: 0.1), AppTheme.primary.withValues(alpha: 0.05)],
+                            colors: [AppTheme.primary.withValues(alpha: 0.12), AppTheme.primary.withValues(alpha: 0.04)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3), width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primary.withValues(alpha: 0.08),
+                              blurRadius: 16,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: AppTheme.primary.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.play_arrow_rounded, color: AppTheme.primary),
+                              child: const Icon(Icons.play_arrow_rounded, color: AppTheme.primary, size: 24),
+                            ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
+                              begin: const Offset(0.95, 0.95),
+                              end: const Offset(1.05, 1.05),
+                              duration: 1000.ms,
+                              curve: Curves.easeInOut,
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: 16),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Lanjutkan Penilaian', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                  const SizedBox(height: 2),
+                                  const Text('Lanjutkan Penilaian', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                                  const SizedBox(height: 4),
                                   Text(
                                     'Kelas ${resumeAssignment.className} - ${resumeAssignment.periodName}',
-                                    style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 13),
+                                    style: TextStyle(color: isDark ? AppTheme.onSurfaceVariantDark : AppTheme.onSurfaceVariantLight, fontSize: 13),
                                   ),
                                 ],
                               ),
@@ -207,9 +219,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.primary,
                                 foregroundColor: Colors.white,
-                                elevation: 0,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                elevation: 4,
+                                shadowColor: AppTheme.primary.withValues(alpha: 0.4),
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               ),
                               child: const Text('Lanjut'),
                             ),
@@ -284,58 +297,101 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildHeader(
-      BuildContext context, String name, bool isDark) {
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 11) return 'Selamat Pagi,';
+    if (hour < 15) return 'Selamat Siang,';
+    if (hour < 18) return 'Selamat Sore,';
+    return 'Selamat Malam,';
+  }
+
+  Widget _buildHeader(BuildContext context, String name, bool isDark) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isDark
-              ? [
-                  const Color(0xFF064E3B),
-                  const Color(0xFF065F46),
-                ]
-              : [
-                  const Color(0xFF059669),
-                  const Color(0xFF10B981),
-                ],
+              ? [const Color(0xFF064E3B), const Color(0xFF022C22)]
+              : [const Color(0xFF10B981), const Color(0xFF047857)],
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Animate(
-            effects: [FadeEffect(duration: 400.ms)],
-            child: Text(
-              'Assalamu\'alaikum,',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.75),
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+          // Decorative circles (Mesh-like)
+          Positioned(
+            top: -40,
+            right: -20,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.1),
               ),
             ),
           ),
-          const SizedBox(height: 4),
-          Animate(
-            effects: [
-              FadeEffect(duration: 400.ms, delay: 100.ms),
-              SlideEffect(
-                begin: const Offset(0, 0.05),
-                end: Offset.zero,
-                duration: 400.ms,
-                delay: 100.ms,
+          Positioned(
+            bottom: -80,
+            left: -40,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05),
               ),
-            ],
-            child: Text(
-              name,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-              ),
+            ),
+          ),
+          // Content
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Animate(
+                  effects: [FadeEffect(duration: 400.ms)],
+                  child: Row(
+                    children: [
+                      Text(
+                        _getGreeting(),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Text('👋', style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Animate(
+                  effects: [
+                    FadeEffect(duration: 400.ms, delay: 100.ms),
+                    SlideEffect(
+                      begin: const Offset(0, 0.05),
+                      end: Offset.zero,
+                      duration: 400.ms,
+                      delay: 100.ms,
+                      curve: Curves.easeOutCubic,
+                    ),
+                  ],
+                  child: Text(
+                    name.isEmpty ? 'Ustaz/Ustazah' : name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -574,15 +630,11 @@ class _AssignmentCard extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                   ),
                             ),
-                            if (assignment.rantingName != null || assignment.room != null || assignment.gender != null)
+                            if (assignment.rantingName != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 2),
                                 child: Text(
-                                  [
-                                    if (assignment.rantingName != null) assignment.rantingName,
-                                    if (assignment.room != null) 'Ruang: ${assignment.room}',
-                                    if (assignment.gender == 'L') 'Putra' else if (assignment.gender == 'P') 'Putri'
-                                  ].join(' • '),
+                                  assignment.rantingName!.replaceAll(RegExp(r'ranting\s*', caseSensitive: false), '').trim(),
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -673,38 +725,94 @@ class _AssignmentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 7,
-                      backgroundColor: isDark
-                          ? AppTheme.surfaceVariantDark
-                          : AppTheme.surfaceVariantLight,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        isComplete ? AppTheme.success : AppTheme.primary,
-                      ),
+                    borderRadius: BorderRadius.circular(10),
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 8,
+                          color: isDark ? AppTheme.surfaceVariantDark : AppTheme.surfaceVariantLight,
+                        ),
+                        AnimatedContainer(
+                          duration: 800.ms,
+                          curve: Curves.easeOutCubic,
+                          height: 8,
+                          width: MediaQuery.of(context).size.width * progress,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: isComplete
+                                  ? [AppTheme.success, const Color(0xFF34D399)]
+                                  : [AppTheme.primary, AppTheme.primaryLight],
+                            ),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: (isComplete ? AppTheme.success : AppTheme.primary).withValues(alpha: 0.5),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 14),
 
                   // Action button
-                  SizedBox(
+                  Container(
                     width: double.infinity,
-                    height: 44,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: isComplete ? [] : [
+                        BoxShadow(
+                          color: AppTheme.primary.withValues(alpha: 0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        )
+                      ],
+                    ),
                     child: isComplete
                         ? OutlinedButton.icon(
                             onPressed: onTap,
-                            icon: const Icon(Icons.visibility_outlined,
-                                size: 16),
-                            label: const Text('Lihat Detail'),
+                            icon: const Icon(Icons.visibility_outlined, size: 18),
+                            label: const Text('Lihat Detail', style: TextStyle(fontWeight: FontWeight.w700)),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
                           )
-                        : ElevatedButton.icon(
+                        : ElevatedButton(
                             onPressed: onTap,
-                            icon: const Icon(Icons.arrow_forward_rounded,
-                                size: 16),
-                            label: Text(assignment.scoredStudents > 0
-                                ? 'Lanjut Penilaian'
-                                : 'Mulai Penilaian'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [AppTheme.primary, AppTheme.primaryDark],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.arrow_forward_rounded, size: 18, color: Colors.white),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      assignment.scoredStudents > 0 ? 'Lanjut Penilaian' : 'Mulai Penilaian',
+                                      style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                   ),
                 ],

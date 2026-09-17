@@ -3,9 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // === Color Palette ===
-  static const Color primary = Color(0xFF059669);       // Emerald Green
+  static const Color primary = Color(0xFF10B981);       // Vibrant Emerald Green
   static const Color primaryDark = Color(0xFF047857);
-  static const Color primaryLight = Color(0xFF10B981);
+  static const Color primaryLight = Color(0xFF34D399);
   static const Color primarySurface = Color(0xFFECFDF5);
 
   static const Color secondary = Color(0xFF6366F1);     // Indigo
@@ -92,8 +92,8 @@ class AppTheme {
         elevation: 0,
         color: surfaceLight,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFFE2E8F0), width: 1),
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xFFF1F5F9), width: 1.5),
         ),
         margin: EdgeInsets.zero,
       ),
@@ -105,7 +105,7 @@ class AppTheme {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
           ),
           textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 16,
@@ -226,8 +226,8 @@ class AppTheme {
         elevation: 0,
         color: surfaceDark,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Color(0xFF1E2939), width: 1),
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Color(0xFF1E2939), width: 1.5),
         ),
         margin: EdgeInsets.zero,
       ),

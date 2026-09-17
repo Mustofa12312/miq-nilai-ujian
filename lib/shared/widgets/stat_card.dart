@@ -35,22 +35,29 @@ class StatCard extends StatelessWidget {
         ),
       ],
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: isDark ? AppTheme.surfaceDark : AppTheme.surfaceLight,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isDark
                 ? const Color(0xFF1E2939)
-                : const Color(0xFFE2E8F0),
-            width: 1,
+                : const Color(0xFFF1F5F9),
+            width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: cardColor.withValues(alpha: 0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: cardColor.withValues(alpha: isDark ? 0.15 : 0.2),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+              spreadRadius: -2,
             ),
+            if (!isDark)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
           ],
         ),
         child: Column(
