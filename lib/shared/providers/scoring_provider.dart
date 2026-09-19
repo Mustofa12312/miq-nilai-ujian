@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../shared/models/criteria_model.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/services/supabase_service.dart';
@@ -61,11 +62,17 @@ class ScoringState {
 
   double get percentage => totalScore;
 
-  List<CriteriaEntry> get tajwidEntries =>
-      entries.where((e) => e.criteria.category == AppConstants.categoryTajwid).toList();
+  List<CriteriaEntry> get tajwidEntries => entries
+      .where((e) => e.criteria.category == AppConstants.categoryTajwid)
+      .toList();
 
-  List<CriteriaEntry> get fasohahEntries =>
-      entries.where((e) => e.criteria.category == AppConstants.categoryFasohah).toList();
+  List<CriteriaEntry> get fasohahEntries => entries
+      .where((e) => e.criteria.category == AppConstants.categoryFasohah)
+      .toList();
+
+  List<CriteriaEntry> get pertanyaanEntries => entries
+      .where((e) => e.criteria.category == AppConstants.categoryPertanyaan)
+      .toList();
 
   ScoringState copyWith({
     List<CriteriaEntry>? entries,
@@ -98,7 +105,13 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
   ScoringNotifier(this.localStorage) : super(const ScoringState());
 
   /// Inisialisasi form — muat kriteria dari Supabase, resolve periode & exam_type, dan load existing score jika ada
-  Future<void> initForStudent({int? studentId, int? periodId, int? examTypeId, int? scoreId, bool isLocked = false}) async {
+  Future<void> initForStudent({
+    int? studentId,
+    int? periodId,
+    int? examTypeId,
+    int? scoreId,
+    bool isLocked = false,
+  }) async {
     state = state.copyWith(isLoadingCriteria: true, clearError: true);
 
     try {
@@ -123,10 +136,11 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
             .from('score_details')
             .select('criteria_id, mistakes')
             .eq('score_id', scoreId);
-        
+
         final Map<int, int> existingMistakes = {};
         for (var row in detailsRes) {
-          existingMistakes[(row['criteria_id'] as num).toInt()] = (row['mistakes'] as num).toInt();
+          existingMistakes[(row['criteria_id'] as num).toInt()] =
+              (row['mistakes'] as num).toInt();
         }
 
         entries = entries.map((e) {
@@ -136,13 +150,16 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
       } else if (studentId != null && localStorage != null) {
         // Cek offline pending score
         final pending = localStorage!.getPendingScores();
-        final match = pending.where((p) => p['student_id'] == studentId).lastOrNull;
+        final match = pending
+            .where((p) => p['student_id'] == studentId)
+            .lastOrNull;
         if (match != null) {
           final savedEntries = match['entries'] as List<dynamic>?;
           if (savedEntries != null) {
             final Map<int, int> existingMistakes = {};
             for (var row in savedEntries) {
-               existingMistakes[(row['criteria_id'] as num).toInt()] = (row['mistakes'] as num).toInt();
+              existingMistakes[(row['criteria_id'] as num).toInt()] =
+                  (row['mistakes'] as num).toInt();
             }
             entries = entries.map((e) {
               final m = existingMistakes[e.criteria.id];
@@ -160,7 +177,9 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
             .select('id')
             .eq('active', true)
             .maybeSingle();
-        activePeriodId = periodRes != null ? (periodRes['id'] as num).toInt() : null;
+        activePeriodId = periodRes != null
+            ? (periodRes['id'] as num).toInt()
+            : null;
       }
 
       // 3. Resolve exam_type default jika tidak dikirim dari luar
@@ -219,7 +238,8 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
   Future<bool> saveScore(int studentId, int classId) async {
     if (state.periodId == null || state.examTypeId == null) {
       state = state.copyWith(
-        error: 'Tidak ada periode atau jenis ujian aktif. Hubungi administrator.',
+        error:
+            'Tidak ada periode atau jenis ujian aktif. Hubungi administrator.',
       );
       return false;
     }
@@ -228,10 +248,13 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
 
     try {
       final user = supabaseAuth.currentUser;
-      if (user == null) throw Exception('Sesi login tidak valid. Silakan login kembali.');
+      if (user == null)
+        throw Exception('Sesi login tidak valid. Silakan login kembali.');
 
       if (state.isLocked) {
-        throw Exception('Nilai santri ini sudah dikunci dan tidak dapat diubah.');
+        throw Exception(
+          'Nilai santri ini sudah dikunci dan tidak dapat diubah.',
+        );
       }
 
       final existing = await supabase
@@ -244,9 +267,9 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
 
       if (existing != null && state.scoreId == null) {
         final isLocked = existing['locked'] as bool? ?? false;
-        throw Exception(isLocked
-            ? 'Nilai santri ini sudah dikunci dan tidak dapat diubah.'
-            : 'Santri ini sudah memiliki nilai untuk periode ujian ini. Silakan muat ulang halaman.');
+        throw Exception(
+          isLocked ? 'Nilai santri ini sudah dikunci dan tidak dapat diubah.' : 'Santri ini sudah memiliki nilai untuk periode ujian ini. Silakan muat ulang halaman.',
+        );
       }
 
       final actualScoreId = state.scoreId ?? existing?['id'];
@@ -264,11 +287,14 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
             .eq('id', actualScoreId)
             .select()
             .single();
-        
+
         finalScoreId = scoreRes['id'];
 
         // Hapus detail lama, insert detail baru
-        await supabase.from('score_details').delete().eq('score_id', finalScoreId);
+        await supabase
+            .from('score_details')
+            .delete()
+            .eq('score_id', finalScoreId);
       } else {
         // Mode Insert Baru
         final sessionRes = await supabase
@@ -295,18 +321,22 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
             })
             .select()
             .single();
-        
+
         finalScoreId = scoreRes['id'];
       }
 
       // 4. Buat score_details (satu baris per kriteria)
       // Simpan potongan (bukan sisa skor), trigger DB menghitung ulang total
-      final details = state.entries.map((e) => {
-            'score_id': finalScoreId,
-            'criteria_id': e.criteria.id,
-            'mistakes': e.mistakes,
-            'score': e.deduction,  // total potongan untuk kriteria ini
-          }).toList();
+      final details = state.entries
+          .map(
+            (e) => {
+              'score_id': finalScoreId,
+              'criteria_id': e.criteria.id,
+              'mistakes': e.mistakes,
+              'score': e.deduction, // total potongan untuk kriteria ini
+            },
+          )
+          .toList();
 
       if (details.isNotEmpty) {
         await supabase.from('score_details').insert(details);
@@ -315,9 +345,10 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
       state = state.copyWith(isSaving: false, isSaved: true);
       return true;
     } catch (e) {
-      final isOffline = e.toString().contains('Failed host lookup') || 
-                        e.toString().contains('ClientException') ||
-                        e.toString().contains('Connection refused');
+      final isOffline =
+          e.toString().contains('Failed host lookup') ||
+          e.toString().contains('ClientException') ||
+          e.toString().contains('Connection refused');
 
       if (isOffline && localStorage != null) {
         // Save to offline queue
@@ -328,14 +359,18 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
           'exam_type_id': state.examTypeId,
           'total_score': state.totalScore,
           'grade': state.grade,
-          'entries': state.entries.map((e) => {
-            'criteria_id': e.criteria.id,
-            'mistakes': e.mistakes,
-            'score': e.deduction,  // simpan potongan
-          }).toList(),
+          'entries': state.entries
+              .map(
+                (e) => {
+                  'criteria_id': e.criteria.id,
+                  'mistakes': e.mistakes,
+                  'score': e.deduction, // simpan potongan
+                },
+              )
+              .toList(),
           'timestamp': DateTime.now().toIso8601String(),
         });
-        
+
         state = state.copyWith(isSaving: false, isSaved: true);
         return true;
       }
@@ -353,8 +388,9 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
   }
 }
 
-final scoringProvider =
-    StateNotifierProvider<ScoringNotifier, ScoringState>((ref) {
+final scoringProvider = StateNotifierProvider<ScoringNotifier, ScoringState>((
+  ref,
+) {
   final localStorage = ref.watch(localStorageProvider);
   return ScoringNotifier(localStorage);
 });

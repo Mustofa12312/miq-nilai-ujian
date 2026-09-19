@@ -236,6 +236,32 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
 
           const SizedBox(height: 20),
 
+          // ── PERTANYAAN Section ─────────────────────────────────────────
+          if (scoringState.pertanyaanEntries.isNotEmpty) ...[
+            _SectionHeader(
+              title: 'Pertanyaan',
+              icon: '❓',
+              totalDeduction: scoringState.pertanyaanEntries
+                  .fold(0.0, (s, e) => s + e.deduction),
+              animDelay: 100,
+            ),
+            const SizedBox(height: 10),
+            ...scoringState.pertanyaanEntries.asMap().entries.map((entry) {
+              return CriteriaRow(
+                entry: entry.value,
+                index: entry.key + scoringState.tajwidEntries.length,
+                enabled: !scoringState.isLocked,
+                onIncrement: () => ref
+                    .read(scoringProvider.notifier)
+                    .incrementMistakes(entry.value.criteria.id),
+                onDecrement: () => ref
+                    .read(scoringProvider.notifier)
+                    .decrementMistakes(entry.value.criteria.id),
+              );
+            }),
+            const SizedBox(height: 20),
+          ],
+
           // ── FASOHAH Section ─────────────────────────────────────────
           _SectionHeader(
             title: 'Fasohah',
@@ -248,7 +274,7 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
           ...scoringState.fasohahEntries.asMap().entries.map((entry) {
             return CriteriaRow(
               entry: entry.value,
-              index: entry.key + 4,
+              index: entry.key + scoringState.tajwidEntries.length + scoringState.pertanyaanEntries.length,
               enabled: !scoringState.isLocked,
               onIncrement: () => ref
                   .read(scoringProvider.notifier)
