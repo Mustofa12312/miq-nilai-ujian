@@ -44,7 +44,7 @@ class _CriteriaRowState extends State<CriteriaRow>
   @override
   void didUpdateWidget(CriteriaRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.entry.score != widget.entry.score) {
+    if (oldWidget.entry.deduction != widget.entry.deduction) {
       _animateScore();
     }
   }
@@ -66,21 +66,15 @@ class _CriteriaRowState extends State<CriteriaRow>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final entry = widget.entry;
-    final score = entry.score;
-    final maxScore = entry.criteria.defaultScore;
-    final isMaxMistakes = entry.mistakes >= entry.criteria.maxMistakes;
+    final currentDeduction = entry.deduction;
     final isZeroMistakes = entry.mistakes == 0;
 
-    // Score color
-    Color scoreColor;
-    final pct = score / maxScore;
-    if (pct >= 0.9) {
-      scoreColor = AppTheme.success;
-    } else if (pct >= 0.7) {
-      scoreColor = AppTheme.warning;
-    } else {
-      scoreColor = AppTheme.error;
-    }
+    // Warna berdasarkan ada/tidaknya potongan
+    final Color scoreColor = currentDeduction == 0
+        ? AppTheme.success
+        : currentDeduction <= 5
+            ? AppTheme.warning
+            : AppTheme.error;
 
     return Animate(
       effects: [
@@ -169,13 +163,13 @@ class _CriteriaRowState extends State<CriteriaRow>
                 ),
                 _CounterButton(
                   icon: Icons.add_rounded,
-                  onTap: (widget.enabled && !isMaxMistakes)
+                  onTap: widget.enabled
                       ? () {
                           HapticFeedback.lightImpact();
                           widget.onIncrement();
                         }
                       : null,
-                  enabled: widget.enabled && !isMaxMistakes,
+                  enabled: widget.enabled,
                   isDark: isDark,
                 ),
               ],
@@ -192,7 +186,9 @@ class _CriteriaRowState extends State<CriteriaRow>
                   child: SizedBox(
                     width: 40,
                     child: Text(
-                      score.toInt().toString(),
+                      currentDeduction > 0
+                          ? '-${currentDeduction.toInt()}'
+                          : '0',
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontSize: 18,

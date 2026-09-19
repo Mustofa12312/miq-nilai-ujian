@@ -15,12 +15,11 @@ class CriteriaModel {
     required this.sortOrder,
   });
 
-  double scoreForMistakes(int mistakes) {
-    final result = defaultScore - (mistakes * deduction);
-    return result < 0 ? 0 : result;
+  // Mengembalikan total potongan untuk kriteria ini (bukan sisa skor)
+  // Logika baru: total = 100 - semua_potongan (dihitung di ScoringState)
+  double deductionForMistakes(int mistakes) {
+    return mistakes * deduction;
   }
-
-  int get maxMistakes => (defaultScore / deduction).floor();
 
   factory CriteriaModel.fromJson(Map<String, dynamic> json) {
     return CriteriaModel(

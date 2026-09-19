@@ -215,10 +215,8 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
           _SectionHeader(
             title: 'Tajwid',
             icon: '🕌',
-            total: scoringState.tajwidEntries
-                .fold(0.0, (s, e) => s + e.score),
-            max: scoringState.tajwidEntries
-                .fold(0.0, (s, e) => s + e.criteria.defaultScore),
+            totalDeduction: scoringState.tajwidEntries
+                .fold(0.0, (s, e) => s + e.deduction),
             animDelay: 0,
           ),
           const SizedBox(height: 10),
@@ -242,10 +240,8 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
           _SectionHeader(
             title: 'Fasohah',
             icon: '📖',
-            total: scoringState.fasohahEntries
-                .fold(0.0, (s, e) => s + e.score),
-            max: scoringState.fasohahEntries
-                .fold(0.0, (s, e) => s + e.criteria.defaultScore),
+            totalDeduction: scoringState.fasohahEntries
+                .fold(0.0, (s, e) => s + e.deduction),
             animDelay: 200,
           ),
           const SizedBox(height: 10),
@@ -273,31 +269,24 @@ class _ScoringScreenState extends ConsumerState<ScoringScreen>
 class _SectionHeader extends StatelessWidget {
   final String title;
   final String icon;
-  final double total;
-  final double max;
+  final double totalDeduction;
   final int animDelay;
 
   const _SectionHeader({
     required this.title,
     required this.icon,
-    required this.total,
-    required this.max,
+    required this.totalDeduction,
     required this.animDelay,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final pct = max > 0 ? total / max : 0.0;
-
-    Color color;
-    if (pct >= 0.9) {
-      color = AppTheme.success;
-    } else if (pct >= 0.7) {
-      color = AppTheme.warning;
-    } else {
-      color = AppTheme.error;
-    }
+    final Color color = totalDeduction == 0
+        ? AppTheme.success
+        : totalDeduction <= 10
+            ? AppTheme.warning
+            : AppTheme.error;
 
     return Animate(
       effects: [
@@ -344,8 +333,10 @@ class _SectionHeader extends StatelessWidget {
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: Text(
-                '${total.toInt()} / ${max.toInt()}',
-                key: ValueKey(total),
+                totalDeduction > 0
+                    ? '-${totalDeduction.toInt()} poin'
+                    : 'Sempurna',
+                key: ValueKey(totalDeduction),
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,

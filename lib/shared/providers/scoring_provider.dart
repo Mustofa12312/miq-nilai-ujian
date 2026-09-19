@@ -12,7 +12,8 @@ class CriteriaEntry {
 
   const CriteriaEntry({required this.criteria, required this.mistakes});
 
-  double get score => criteria.scoreForMistakes(mistakes);
+  // Potongan untuk kriteria ini
+  double get deduction => criteria.deductionForMistakes(mistakes);
 
   CriteriaEntry copyWith({int? mistakes}) {
     return CriteriaEntry(
@@ -47,17 +48,18 @@ class ScoringState {
     this.isLocked = false,
   });
 
-  double get totalScore =>
-      entries.fold(0, (sum, e) => sum + e.score);
+  // Logika baru: Total = 100 - SUM(semua potongan), minimum 0
+  double get totalScore {
+    final totalDeduction = entries.fold(0.0, (sum, e) => sum + e.deduction);
+    return (100 - totalDeduction).clamp(0, 100);
+  }
 
-  double get maxPossibleScore =>
-      entries.fold(0, (sum, e) => sum + e.criteria.defaultScore);
+  double get maxPossibleScore => 100;
 
-  String get grade => AppConstants.calculateGrade(totalScore, maxPossibleScore);
+  // Grade langsung dari nilai final (bukan persentase terhadap maxPossible)
+  String get grade => AppConstants.calculateGrade(totalScore);
 
-  double get percentage => maxPossibleScore > 0
-      ? (totalScore / maxPossibleScore) * 100
-      : 0;
+  double get percentage => totalScore;
 
   List<CriteriaEntry> get tajwidEntries =>
       entries.where((e) => e.criteria.category == AppConstants.categoryTajwid).toList();
@@ -192,12 +194,11 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
   }
 
   void incrementMistakes(int criteriaId) {
+    // Logika baru: tidak ada batas maxMistakes per kriteria
     state = state.copyWith(
       entries: state.entries.map((e) {
         if (e.criteria.id == criteriaId) {
-          if (e.mistakes < e.criteria.maxMistakes) {
-            return e.copyWith(mistakes: e.mistakes + 1);
-          }
+          return e.copyWith(mistakes: e.mistakes + 1);
         }
         return e;
       }).toList(),
@@ -299,11 +300,12 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
       }
 
       // 4. Buat score_details (satu baris per kriteria)
+      // Simpan potongan (bukan sisa skor), trigger DB menghitung ulang total
       final details = state.entries.map((e) => {
             'score_id': finalScoreId,
             'criteria_id': e.criteria.id,
             'mistakes': e.mistakes,
-            'score': e.score,
+            'score': e.deduction,  // total potongan untuk kriteria ini
           }).toList();
 
       if (details.isNotEmpty) {
@@ -329,7 +331,7 @@ class ScoringNotifier extends StateNotifier<ScoringState> {
           'entries': state.entries.map((e) => {
             'criteria_id': e.criteria.id,
             'mistakes': e.mistakes,
-            'score': e.score,
+            'score': e.deduction,  // simpan potongan
           }).toList(),
           'timestamp': DateTime.now().toIso8601String(),
         });

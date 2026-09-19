@@ -10,14 +10,13 @@ class AppConstants {
   static const String categoryFasohah = 'FASOHAH';
 
   // ── Grade Calculation ──────────────────────────────────────────────────────
-  // Berdasarkan PERSENTASE dari total skor terhadap maksimum (konsisten dengan web)
-  static String calculateGrade(double totalScore, double maxScore) {
-    if (maxScore <= 0) return "I'adah";
-    final pct = (totalScore / maxScore) * 100;
-    if (pct >= 90) return 'Mumtaz';
-    if (pct >= 80) return 'Jayyid Jiddan';
-    if (pct >= 70) return 'Jayyid';
-    if (pct >= 60) return 'Maqbul';
+  // Logika baru: berdasarkan nilai final langsung (0-100)
+  // Total = 100 - semua potongan, tidak ada pembagian dengan maxScore lagi
+  static String calculateGrade(double totalScore) {
+    if (totalScore >= 90) return 'Mumtaz';
+    if (totalScore >= 80) return 'Jayyid Jiddan';
+    if (totalScore >= 70) return 'Jayyid';
+    if (totalScore >= 60) return 'Maqbul';
     return "I'adah";
   }
 
